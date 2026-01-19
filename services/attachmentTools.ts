@@ -11,10 +11,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
 // 复用 AI 配置
-const AI_BASE_URL = 'https://api.restoremotion.xyz';
+const AI_BASE_URL = import.meta.env.VITE_AI_BASE_URL || 'https://api.restoremotion.xyz';
+const WORKER_API_KEY = import.meta.env.VITE_WORKER_API_KEY || '';
+
 const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || 'cf-worker-proxy',
-    httpOptions: { baseUrl: AI_BASE_URL }
+    apiKey: import.meta.env.VITE_GEMINI_API_KEY || 'cf-worker-proxy',
+    httpOptions: {
+        baseUrl: AI_BASE_URL,
+        headers: WORKER_API_KEY ? { 'X-API-Key': WORKER_API_KEY } : undefined
+    }
 });
 
 // ============================================

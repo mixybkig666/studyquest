@@ -3,11 +3,16 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { Attachment } from "../types";
 
 // Use Cloudflare Worker proxy to bypass CORS and regional restrictions
-// The Worker handles actual API key authentication, but SDK requires a non-empty value
-const AI_BASE_URL = 'https://api.restoremotion.xyz';
+// Worker requires X-API-Key header for authentication
+const AI_BASE_URL = import.meta.env.VITE_AI_BASE_URL || 'https://api.restoremotion.xyz';
+const WORKER_API_KEY = import.meta.env.VITE_WORKER_API_KEY || '';
+
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY || 'cf-worker-proxy',
-  httpOptions: { baseUrl: AI_BASE_URL }
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY || 'cf-worker-proxy',
+  httpOptions: {
+    baseUrl: AI_BASE_URL,
+    headers: WORKER_API_KEY ? { 'X-API-Key': WORKER_API_KEY } : undefined
+  }
 });
 
 // 带重试的生成函数
