@@ -1,0 +1,7 @@
+{
+  "name": "StudyQuest",
+  "description": "A gamified learning adventure for children, featuring AI-driven content generation and parent controls.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
