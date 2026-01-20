@@ -626,7 +626,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                             className="absolute inset-0 bg-black/30 backdrop-blur-sm"
                             onClick={() => { setShowQuestionsDrawer(false); setReviewingQuestion(null); }}
                         />
-                        <div className="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl flex flex-col animate-slide-in-right">
+                        <div className="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl flex flex-col animate-slide-in-right overflow-x-hidden">
                             <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-white sticky top-0 z-10">
                                 <h3 className="font-bold text-gray-800 text-lg">
                                     📝 答题记录 ({reviewCorrectCount}/{questionsState.length} 正确)
@@ -639,7 +639,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto">
+                            <div className="flex-1 overflow-y-auto overflow-x-hidden">
                                 {reviewQ !== null && reviewingQuestion !== null ? (
                                     // 显示单道题目详情
                                     <div className="p-4">
@@ -651,12 +651,12 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                             <span>返回题目列表</span>
                                         </button>
 
-                                        <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                                        <div className="bg-gray-50 rounded-xl p-4 mb-4 overflow-hidden">
                                             <div className="flex items-center gap-2 mb-3">
                                                 <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded uppercase">{reviewQ.question_type}</span>
                                                 {reviewQ.difficulty_tag && <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded">{reviewQ.difficulty_tag}</span>}
                                             </div>
-                                            <h4 className="font-bold text-gray-800 text-lg mb-4 break-words overflow-hidden">
+                                            <h4 className="font-bold text-gray-800 text-lg mb-4 break-all overflow-hidden whitespace-pre-wrap">
                                                 <Latex>{reviewQ.question_text?.includes('\\') ? `$${reviewQ.question_text}$` : reviewQ.question_text}</Latex>
                                             </h4>
 
@@ -691,7 +691,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                             {reviewQ.explanation && (
                                                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                                     <div className="text-blue-700 font-bold text-sm mb-1">💡 解析</div>
-                                                    <div className="text-blue-800">
+                                                    <div className="text-blue-800 break-all whitespace-pre-wrap">
                                                         <Latex>{reviewQ.explanation.includes('\\') ? `$${reviewQ.explanation}$` : reviewQ.explanation}</Latex>
                                                     </div>
                                                 </div>
