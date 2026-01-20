@@ -2,6 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===================================================================
+   🔧 全局文字换行修复 - 解决 Latex 组件导致的文字溢出问题
+   =================================================================== */
+
+/* 强制所有 Latex 渲染内容换行 */
+.latex-content,
+.latex-content * {
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+}
+
+/* 抽屉内容区域强制换行 */
+.drawer-content h4,
+.drawer-content p,
+.drawer-content div,
+.drawer-content span {
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* 强制 KaTeX 公式容器换行 */
+.katex-display,
+.katex {
+    white-space: normal !important;
+    word-break: break-all !important;
+}
+
+/* 题目文字容器 */
+.question-text {
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    hyphens: auto;
+}
+
 body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
