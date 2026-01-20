@@ -22,6 +22,47 @@ import {
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 
+// 安全的文本渲染组件：只对数学公式使用 Latex，普通文字直接显示
+// 解决 react-latex-next 导致的长文本无法换行问题
+const SafeText: React.FC<{ children: string; className?: string }> = ({ children, className }) => {
+    if (!children) return null;
+    const text = String(children);
+
+    // 检测是否包含 LaTeX 公式（使用字符串 includes 检测反斜杠命令）
+    const latexPattern = /\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty)/;
+    const hasLatex = text.includes('$') || latexPattern.test(text);
+
+    if (!hasLatex) {
+        // 普通文本直接显示
+        return <span className={className}>{text}</span>;
+    }
+
+    // 如果文本较短（<100字符），直接用 Latex 渲染整个文本
+    // 需要用 $ 包裹公式部分让 react-latex-next 识别
+    if (text.length < 100) {
+        // 将 \frac{a}{b} 这样的公式用 $ 包裹
+        const wrappedText = text.replace(/(\\(?:frac|times|div|sqrt|sum|int|cdot)\{[^}]*\}(?:\{[^}]*\})?)/g, ' $$$1$$ ');
+        return <span className={className} style={{ display: 'inline' }}><Latex>{wrappedText}</Latex></span>;
+    }
+
+    // 长文本：按句子分割，每段单独处理以实现换行
+    const parts = text.split(/([。！？\n])/);
+    return (
+        <span className={className}>
+            {parts.map((part, i) => {
+                if (!part) return null;
+                const partHasLatex = latexPattern.test(part) || part.includes('$');
+                if (partHasLatex) {
+                    // 用 $ 包裹公式部分
+                    const wrappedPart = part.replace(/(\\(?:frac|times|div|sqrt|sum|int|cdot)\{[^}]*\}(?:\{[^}]*\})?)/g, ' $$$1$$ ');
+                    return <span key={i} style={{ display: 'inline' }}><Latex>{wrappedPart}</Latex></span>;
+                }
+                return <span key={i}>{part}</span>;
+            })}
+        </span>
+    );
+};
+
 interface QuestModeProps {
     task: DailyTask;
     onExit: () => void;
@@ -656,8 +697,8 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                                 <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded uppercase">{reviewQ.question_type}</span>
                                                 {reviewQ.difficulty_tag && <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded">{reviewQ.difficulty_tag}</span>}
                                             </div>
-                                            <h4 className="font-bold text-gray-800 text-lg mb-4 question-text" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                                                <span className="latex-content"><Latex>{reviewQ.question_text?.includes('\\') ? `$${reviewQ.question_text}$` : reviewQ.question_text}</Latex></span>
+                                            <h4 className="font-bold text-gray-800 text-lg mb-4 question-text" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                                                <SafeText>{reviewQ.question_text || ''}</SafeText>
                                             </h4>
 
                                             {/* Options/Answer display */}
@@ -691,8 +732,8 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                             {reviewQ.explanation && (
                                                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                                     <div className="text-blue-700 font-bold text-sm mb-1">💡 解析</div>
-                                                    <div className="text-blue-800 latex-content" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                                                        <Latex>{reviewQ.explanation.includes('\\') ? `$${reviewQ.explanation}$` : reviewQ.explanation}</Latex>
+                                                    <div className="text-blue-800" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                                                        <SafeText>{reviewQ.explanation || ''}</SafeText>
                                                     </div>
                                                 </div>
                                             )}
@@ -832,8 +873,8 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                             </div>
                         </div>
 
-                        <h3 className="text-xl md:text-2xl font-bold mb-8 text-gray-800 leading-relaxed font-display" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                            <Latex>{currentQ.question_text?.includes('\\') ? `$${currentQ.question_text}$` : currentQ.question_text}</Latex>
+                        <h3 className="text-xl md:text-2xl font-bold mb-8 text-gray-800 leading-relaxed font-display" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                            <SafeText>{currentQ.question_text || ''}</SafeText>
                         </h3>
 
                         {renderInteraction()}
@@ -859,12 +900,12 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                             }
                                         </div>
                                     </div>
-                                    <div className="mt-2 text-gray-700">
-                                        <Latex>{currentQ.explanation?.includes('\\') ? `$${currentQ.explanation}$` : currentQ.explanation}</Latex>
+                                    <div className="mt-2 text-gray-700" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                                        <SafeText>{currentQ.explanation || ''}</SafeText>
                                     </div>
                                     {!aiExplanation && <div onClick={handleExplainMore} className="mt-2 text-brand-teal font-bold cursor-pointer hover:underline">🤔 还是不懂？点我让 AI 老师详解</div>}
-                                    {aiExplanation && <div className="mt-3 bg-white/80 p-3 rounded border border-blue-100">
-                                        <Latex>{aiExplanation.includes('\\') ? `$${aiExplanation}$` : aiExplanation}</Latex>
+                                    {aiExplanation && <div className="mt-3 bg-white/80 p-3 rounded border border-blue-100" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                                        <SafeText>{aiExplanation || ''}</SafeText>
                                     </div>}
                                 </div>
                                 <Button onClick={handleNext} className="w-full shadow-xl" size="xl" icon={<i className="fas fa-arrow-right"></i>}>{isLastQuestion ? "领取奖励" : "下一题"}</Button>
