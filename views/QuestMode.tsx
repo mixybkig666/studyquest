@@ -651,12 +651,12 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                             <span>返回题目列表</span>
                                         </button>
 
-                                        <div className="bg-gray-50 rounded-xl p-4 mb-4 overflow-hidden">
+                                        <div className="bg-gray-50 rounded-xl p-4 mb-4">
                                             <div className="flex items-center gap-2 mb-3">
                                                 <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded uppercase">{reviewQ.question_type}</span>
                                                 {reviewQ.difficulty_tag && <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded">{reviewQ.difficulty_tag}</span>}
                                             </div>
-                                            <h4 className="font-bold text-gray-800 text-lg mb-4 break-all overflow-hidden whitespace-pre-wrap">
+                                            <h4 className="font-bold text-gray-800 text-lg mb-4" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                                                 <Latex>{reviewQ.question_text?.includes('\\') ? `$${reviewQ.question_text}$` : reviewQ.question_text}</Latex>
                                             </h4>
 
@@ -691,7 +691,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                             {reviewQ.explanation && (
                                                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                                     <div className="text-blue-700 font-bold text-sm mb-1">💡 解析</div>
-                                                    <div className="text-blue-800 break-all whitespace-pre-wrap">
+                                                    <div className="text-blue-800" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                                                         <Latex>{reviewQ.explanation.includes('\\') ? `$${reviewQ.explanation}$` : reviewQ.explanation}</Latex>
                                                     </div>
                                                 </div>
@@ -832,7 +832,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                             </div>
                         </div>
 
-                        <h3 className="text-xl md:text-2xl font-bold mb-8 text-gray-800 leading-relaxed font-display break-words overflow-hidden">
+                        <h3 className="text-xl md:text-2xl font-bold mb-8 text-gray-800 leading-relaxed font-display" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                             <Latex>{currentQ.question_text?.includes('\\') ? `$${currentQ.question_text}$` : currentQ.question_text}</Latex>
                         </h3>
 
