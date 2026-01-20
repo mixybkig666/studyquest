@@ -449,11 +449,28 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
         }
 
         if (currentQ.question_type === 'choice') {
-            return <div className="space-y-3">{currentQ.options?.map((o, i) => (
-                <button key={i} disabled={showResult} onClick={() => setUserAnswer(i)} className={`w-full p-4 rounded-xl border-2 text-left transition-all ${showResult ? (i === getCorrectOptionIndex() ? 'bg-green-100 border-green-500 shadow-sm' : userAnswer === i ? 'bg-red-50 border-red-500' : 'opacity-50 border-transparent bg-gray-50') : (userAnswer === i ? 'border-brand-teal bg-brand-mint shadow-md transform scale-[1.01]' : 'border-gray-100 bg-white hover:border-brand-teal/30 hover:bg-gray-50')}`}>
-                    <Latex>{o.includes('\\') ? `$${o}$` : o}</Latex>
-                </button>
-            ))}</div>
+            const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+            return <div className="space-y-3">{currentQ.options?.map((o, i) => {
+                const optionText = String(o || '').trim();
+                const label = optionLabels[i] || String(i + 1);
+                // 如果选项为空或无效，显示占位符
+                const displayText = optionText.length > 0 ? optionText : `(选项 ${label} 内容缺失)`;
+                return (
+                    <button
+                        key={i}
+                        disabled={showResult || optionText.length === 0}
+                        onClick={() => setUserAnswer(i)}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3 ${showResult ? (i === getCorrectOptionIndex() ? 'bg-green-100 border-green-500 shadow-sm' : userAnswer === i ? 'bg-red-50 border-red-500' : 'opacity-50 border-transparent bg-gray-50') : (userAnswer === i ? 'border-brand-teal bg-brand-mint shadow-md transform scale-[1.01]' : 'border-gray-100 bg-white hover:border-brand-teal/30 hover:bg-gray-50')}`}
+                    >
+                        <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${userAnswer === i ? 'bg-brand-teal text-white' : 'bg-gray-100 text-gray-600'}`}>
+                            {label}
+                        </span>
+                        <span className="flex-1">
+                            <Latex>{optionText.includes('\\') ? `$${optionText}$` : displayText}</Latex>
+                        </span>
+                    </button>
+                );
+            })}</div>
         }
 
         // 开放式题目的专门渲染
@@ -639,7 +656,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                                 <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded uppercase">{reviewQ.question_type}</span>
                                                 {reviewQ.difficulty_tag && <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded">{reviewQ.difficulty_tag}</span>}
                                             </div>
-                                            <h4 className="font-bold text-gray-800 text-lg mb-4">
+                                            <h4 className="font-bold text-gray-800 text-lg mb-4 break-words overflow-hidden">
                                                 <Latex>{reviewQ.question_text?.includes('\\') ? `$${reviewQ.question_text}$` : reviewQ.question_text}</Latex>
                                             </h4>
 
@@ -815,7 +832,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                             </div>
                         </div>
 
-                        <h3 className="text-xl md:text-2xl font-bold mb-8 text-gray-800 leading-relaxed font-display">
+                        <h3 className="text-xl md:text-2xl font-bold mb-8 text-gray-800 leading-relaxed font-display break-words overflow-hidden">
                             <Latex>{currentQ.question_text?.includes('\\') ? `$${currentQ.question_text}$` : currentQ.question_text}</Latex>
                         </h3>
 

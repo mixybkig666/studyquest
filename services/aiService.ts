@@ -706,21 +706,58 @@ export const analyzeMaterialsAndCreatePlan = async (
     // --- SANITIZATION & RECOVERY: 强力清洗 + 数据抢救 ---
     if (questionsData.questions && Array.isArray(questionsData.questions)) {
       questionsData.questions.forEach((q: any) => {
-        // 先尝试从 options 中抢救元数据 (AI 有时会把 difficulty 塞进 options)
+        // ========== 1. True/False 答案规范化 ==========
+        if (q.question_type === 'true_false') {
+          // 确保 correct_answer 是规范的 "True" 或 "False"
+          const normalizeBoolean = (val: any): string => {
+            if (val === true || val === 1) return 'True';
+            if (val === false || val === 0) return 'False';
+            const s = String(val).trim().toLowerCase();
+            if (['true', 't', 'yes', 'y', '对', '是', 'correct', 'right', '1', '正确', '对的'].includes(s)) return 'True';
+            if (['false', 'f', 'no', 'n', '错', '否', 'incorrect', 'wrong', '0', '错误', '不对', '错的'].includes(s)) return 'False';
+            return 'True'; // 默认
+          };
+
+          // 规范化 correct_answer
+          if (q.correct_answer !== undefined) {
+            q.correct_answer = normalizeBoolean(q.correct_answer);
+          }
+          // 规范化 expected.value
+          if (q.expected?.value !== undefined) {
+            q.expected.value = normalizeBoolean(q.expected.value);
+          }
+          // 确保两者一致
+          if (q.correct_answer && q.expected) {
+            q.expected.value = q.correct_answer;
+          }
+          // True/False 题不需要 options
+          delete q.options;
+          return;
+        }
+
+        // ========== 2. 选择题 options 清洗 ==========
         if (Array.isArray(q.options)) {
+          const originalOptions = [...q.options];
+
           q.options = q.options.filter((opt: string) => {
             const cleanOpt = String(opt).trim();
             const lowerOpt = cleanOpt.toLowerCase();
 
-            // 1. 抢救难度标签
+            // 过滤空选项
+            if (!cleanOpt || cleanOpt.length === 0) return false;
+
+            // 过滤纯字母选项 (A, B, C, D)
+            if (/^[A-D]$/i.test(cleanOpt)) return false;
+
+            // 抢救难度标签
             if (['easy', 'medium', 'hard', 'challenge'].includes(lowerOpt)) {
               if (!q.difficulty_tag) {
-                q.difficulty_tag = cleanOpt.charAt(0).toUpperCase() + cleanOpt.slice(1); // Capitalize
+                q.difficulty_tag = cleanOpt.charAt(0).toUpperCase() + cleanOpt.slice(1);
               }
-              return false; // 从 options 中移除
+              return false;
             }
 
-            // 2. 过滤其他已知垃圾数据
+            // 过滤已知垃圾数据（精确匹配）
             const forbidden = new Set([
               "common_mistakes", "knowledge_points", "question_type",
               "expected", "explanation", "score_value", "correct_answer",
@@ -729,31 +766,49 @@ export const analyzeMaterialsAndCreatePlan = async (
               "options", "questions", "null", "undefined"
             ]);
 
-            // 精确匹配
             for (let f of forbidden) {
               if (f.toLowerCase() === lowerOpt) return false;
             }
 
-            // 匹配 key结构 (e.g. "difficulty: easy")
+            // 匹配 key:value 结构 (e.g. "difficulty: easy")
             if (cleanOpt.match(/^[a-z_]+:\s/i)) return false;
 
             return true;
           });
+
+          // 如果过滤后选项为空，尝试从原始数据恢复
+          if (q.question_type === 'choice' && q.options.length === 0) {
+            console.warn(`[AI Sanitization] All options filtered for: ${q.question_text?.substring(0, 50)}`);
+            console.warn(`[AI Sanitization] Original options:`, originalOptions);
+
+            // 尝试恢复：保留所有非空、非纯字母的选项
+            const recovered = originalOptions.filter((opt: string) => {
+              const clean = String(opt).trim();
+              return clean.length > 1 || !/^[A-D]$/i.test(clean);
+            });
+
+            if (recovered.length > 0) {
+              q.options = recovered;
+              console.log(`[AI Sanitization] Recovered ${recovered.length} options`);
+            } else {
+              // 真的没有有效选项，标记为需要重新生成
+              console.error(`[AI Sanitization] Cannot recover options, marking question as invalid`);
+              q._invalid = true;
+              q.options = ["选项加载失败，请重新生成"];
+            }
+          }
         }
 
-        // 规则 1: 非选择题严禁出现 options (抢救完元数据后再删)
-        if (['fill', 'short_answer', 'open_ended', 'true_false'].includes(q.question_type)) {
+        // ========== 3. 非选择题清理 options ==========
+        if (['fill', 'short_answer', 'open_ended'].includes(q.question_type)) {
           delete q.options;
-          return;
-        }
-
-        // 规则 2: 选择题如果不慎被删光了选项，回退
-        if (q.question_type === 'choice' && (!q.options || q.options.length === 0)) {
-          console.warn(`Sanitization removed all options for Q: ${q.question_text}`);
-          q.options = ["A", "B", "C", "D"]; // 最后的兜底
         }
       });
+
+      // 过滤掉无效题目
+      questionsData.questions = questionsData.questions.filter((q: any) => !q._invalid);
     }
+
 
     // --- MERGE RESULTS ---
     const finalData = {
