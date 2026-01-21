@@ -29,7 +29,8 @@ const SafeText: React.FC<{ children: string; className?: string }> = ({ children
     const text = String(children);
 
     // 检测是否包含 LaTeX 公式（使用字符串 includes 检测反斜杠命令）
-    const latexPattern = /\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty)/;
+    // 支持更多常见的数学符号
+    const latexPattern = /\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|pi|theta)/;
     const hasLatex = text.includes('$') || latexPattern.test(text);
 
     if (!hasLatex) {
@@ -37,11 +38,35 @@ const SafeText: React.FC<{ children: string; className?: string }> = ({ children
         return <span className={className}>{text}</span>;
     }
 
+    // 包裹 LaTeX 公式的辅助函数
+    const wrapLatexFormulas = (input: string): string => {
+        let result = input;
+
+        // 1. 处理带双参数的命令 (如 \frac{a}{b})
+        result = result.replace(
+            /(\\frac\{[^}]*\}\{[^}]*\})/g,
+            ' $$$1$$ '
+        );
+
+        // 2. 处理带单参数的命令 (如 \sqrt{x})
+        result = result.replace(
+            /(\\sqrt\{[^}]*\})/g,
+            ' $$$1$$ '
+        );
+
+        // 3. 处理独立的操作符命令 (如 \times, \div, \cdot, \pm 等)
+        // 这些命令后面没有花括号参数
+        result = result.replace(
+            /\\(times|div|cdot|pm|leq|geq|neq|infty|alpha|beta|pi|theta)(?![a-zA-Z{])/g,
+            ' $$$\\$1$$ '
+        );
+
+        return result;
+    };
+
     // 如果文本较短（<100字符），直接用 Latex 渲染整个文本
-    // 需要用 $ 包裹公式部分让 react-latex-next 识别
     if (text.length < 100) {
-        // 将 \frac{a}{b} 这样的公式用 $ 包裹
-        const wrappedText = text.replace(/(\\(?:frac|times|div|sqrt|sum|int|cdot)\{[^}]*\}(?:\{[^}]*\})?)/g, ' $$$1$$ ');
+        const wrappedText = wrapLatexFormulas(text);
         return <span className={className} style={{ display: 'inline' }}><Latex>{wrappedText}</Latex></span>;
     }
 
@@ -53,8 +78,7 @@ const SafeText: React.FC<{ children: string; className?: string }> = ({ children
                 if (!part) return null;
                 const partHasLatex = latexPattern.test(part) || part.includes('$');
                 if (partHasLatex) {
-                    // 用 $ 包裹公式部分
-                    const wrappedPart = part.replace(/(\\(?:frac|times|div|sqrt|sum|int|cdot)\{[^}]*\}(?:\{[^}]*\})?)/g, ' $$$1$$ ');
+                    const wrappedPart = wrapLatexFormulas(part);
                     return <span key={i} style={{ display: 'inline' }}><Latex>{wrappedPart}</Latex></span>;
                 }
                 return <span key={i}>{part}</span>;
@@ -62,6 +86,7 @@ const SafeText: React.FC<{ children: string; className?: string }> = ({ children
         </span>
     );
 };
+
 
 interface QuestModeProps {
     task: DailyTask;
