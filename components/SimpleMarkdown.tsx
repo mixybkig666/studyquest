@@ -7,11 +7,25 @@ interface SimpleMarkdownProps {
     className?: string;
 }
 
+const LATEX_COMMANDS = 'frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|gamma|delta|pi|theta|lambda|sigma';
+
+/**
+ * 预处理文本：处理换行符和双反斜杠
+ */
+const preprocessText = (text: string): string => {
+    let result = text;
+    // 处理 \n 字符串转为真实换行
+    result = result.replace(/\\n/g, '\n');
+    // 将双反斜杠 LaTeX 命令转为单反斜杠
+    result = result.replace(new RegExp(`\\\\\\\\(${LATEX_COMMANDS})`, 'g'), '\\$1');
+    return result;
+};
+
 /**
  * 检测文本是否包含 LaTeX 公式
  */
 const containsLatex = (text: string): boolean => {
-    const latexPattern = /\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|pi|theta)/;
+    const latexPattern = new RegExp(`\\\\(${LATEX_COMMANDS})`);
     return text.includes('$') || latexPattern.test(text);
 };
 
@@ -21,27 +35,25 @@ const containsLatex = (text: string): boolean => {
 const wrapLatexFormulas = (text: string): string => {
     let result = text;
 
-    // 规范化双反斜杠为单反斜杠
-    result = result.replace(/\\\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|pi|theta)/g, '\\$1');
-
     // 移除已有的 $ 包裹，避免双重包裹
     result = result.replace(/\$\$([^$]+)\$\$/g, '$1');
     result = result.replace(/\$([^$]+)\$/g, '$1');
 
-    // 包裹 \frac{a}{b}
-    result = result.replace(/(\\frac\{[^}]*\}\{[^}]*\})/g, ' $$$1$$ ');
+    // 包裹 \frac{a}{b} - 支持嵌套
+    result = result.replace(/(\\frac\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g, ' $$$1$$ ');
 
     // 包裹 \sqrt{x}
-    result = result.replace(/(\\sqrt\{[^}]*\})/g, ' $$$1$$ ');
+    result = result.replace(/(\\sqrt\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g, ' $$$1$$ ');
 
     // 包裹独立操作符 \times, \div 等
-    result = result.replace(/\\(times|div|cdot|pm|leq|geq|neq|infty|alpha|beta|pi|theta)(?![a-zA-Z{])/g, ' $$\\$1$$ ');
+    result = result.replace(new RegExp(`\\\\(${LATEX_COMMANDS})(?![a-zA-Z{])`, 'g'), ' $$\\$1$$ ');
 
     // 清理多余空格
-    result = result.replace(/\s+/g, ' ').trim();
+    result = result.replace(/[ \t]+/g, ' ').trim();
 
     return result;
 };
+
 
 /**
  * 简单 Markdown 渲染组件
@@ -129,8 +141,9 @@ export const SimpleMarkdown: React.FC<SimpleMarkdownProps> = ({ content, classNa
         );
     };
 
-    // 按换行符分割内容
-    const paragraphs = content.split('\n');
+    // 预处理内容并按换行符分割
+    const processedContent = preprocessText(content);
+    const paragraphs = processedContent.split('\n');
 
     return (
         <div className={`prose prose-stone max-w-none ${className}`}>

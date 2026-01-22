@@ -28,87 +28,110 @@ import {
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 
-// 安全的文本渲染组件：只对数学公式使用 Latex，普通文字直接显示
-// 解决 react-latex-next 导致的长文本无法换行问题
+// 安全的文本渲染组件：处理 LaTeX 公式、换行符、双反斜杠等问题
 const SafeText: React.FC<{ children: string; className?: string }> = ({ children, className }) => {
     if (!children) return null;
     let text = String(children);
 
-    // ====== Step 1: 预处理 - 规范化 LaTeX 格式 ======
-    // AI 可能生成 \\ (双反斜杠) 或 \ (单反斜杠)，需要统一处理
+    // ====== Step 1: 预处理 - 规范化特殊字符 ======
 
-    // 1.1 将双反斜杠转换为单反斜杠（常见于 JSON 转义）
-    text = text.replace(/\\\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|pi|theta)/g, '\\$1');
+    // 1.1 处理换行符：将字符串 "\n" 转换为真实换行
+    text = text.replace(/\\n/g, '\n');
 
-    // 1.2 移除 LaTeX 命令前的多余空格和符号
-    text = text.replace(/\\\s+(frac|times|div|sqrt)/g, '\\$1');
+    // 1.2 将 JSON 转义的双反斜杠 LaTeX 命令转换为单反斜杠
+    // 数据库/JSON 中 \frac 会存储为 \\frac，在 JS 字符串中表现为 "\\frac"
+    // 注意：这里用正则匹配字面的两个反斜杠字符
+    const latexCommands = 'frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|gamma|delta|pi|theta|lambda|sigma';
+    text = text.replace(new RegExp(`\\\\\\\\(${latexCommands})`, 'g'), '\\$1');
 
-    // 1.3 清理畸形的 $$ 标记 (如 \$$\div$)
+    // 1.3 清理畸形的 $$ 标记
     text = text.replace(/\\\$\$/g, ' ');
     text = text.replace(/\$\\\$/g, ' ');
 
     // ====== Step 2: 检测是否包含 LaTeX ======
-    const latexPattern = /\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|pi|theta)/;
+    const latexPattern = new RegExp(`\\\\(${latexCommands})`);
     const hasLatex = text.includes('$') || latexPattern.test(text);
 
     if (!hasLatex) {
-        return <span className={className}>{text}</span>;
+        // 无 LaTeX，处理换行后直接返回
+        const lines = text.split('\n');
+        if (lines.length === 1) {
+            return <span className={className}>{text}</span>;
+        }
+        return (
+            <span className={className}>
+                {lines.map((line, i) => (
+                    <React.Fragment key={i}>
+                        {line}
+                        {i < lines.length - 1 && <br />}
+                    </React.Fragment>
+                ))}
+            </span>
+        );
     }
 
     // ====== Step 3: 包裹 LaTeX 公式 ======
     const wrapLatexFormulas = (input: string): string => {
         let result = input;
 
-        // 移除已有的 $ 包裹，避免双重包裹
+        // 移除已有的 $ 或 $$ 包裹，避免双重包裹
         result = result.replace(/\$\$([^$]+)\$\$/g, '$1');
         result = result.replace(/\$([^$]+)\$/g, '$1');
 
-        // 3.1 处理带双参数的命令 (如 \frac{a}{b})
+        // 3.1 处理 \frac{a}{b} - 支持嵌套大括号
         result = result.replace(
-            /(\\frac\{[^}]*\}\{[^}]*\})/g,
+            /(\\frac\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g,
             ' $$$1$$ '
         );
 
-        // 3.2 处理带单参数的命令 (如 \sqrt{x})
+        // 3.2 处理 \sqrt{x}
         result = result.replace(
-            /(\\sqrt\{[^}]*\})/g,
+            /(\\sqrt\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g,
             ' $$$1$$ '
         );
 
-        // 3.3 处理独立的操作符命令 (如 \times, \div)
+        // 3.3 处理独立操作符 \times, \div 等
         result = result.replace(
-            /\\(times|div|cdot|pm|leq|geq|neq|infty|alpha|beta|pi|theta)(?![a-zA-Z{])/g,
+            new RegExp(`\\\\(${latexCommands})(?![a-zA-Z{])`, 'g'),
             ' $$\\$1$$ '
         );
 
-        // 3.4 清理多余空格
-        result = result.replace(/\s+/g, ' ').trim();
+        // 3.4 清理多余空格（保留换行）
+        result = result.replace(/[ \t]+/g, ' ').trim();
 
         return result;
     };
 
     // ====== Step 4: 渲染 ======
-    if (text.length < 200) {
-        const wrappedText = wrapLatexFormulas(text);
-        return <span className={className} style={{ display: 'inline' }}><Latex>{wrappedText}</Latex></span>;
-    }
+    // 先按换行分割，然后每行单独处理 LaTeX
+    const lines = text.split('\n');
 
-    // 长文本：按句子分割
-    const parts = text.split(/([。！？\n])/);
     return (
         <span className={className}>
-            {parts.map((part, i) => {
-                if (!part) return null;
-                const partHasLatex = latexPattern.test(part) || part.includes('$');
-                if (partHasLatex) {
-                    const wrappedPart = wrapLatexFormulas(part);
-                    return <span key={i} style={{ display: 'inline' }}><Latex>{wrappedPart}</Latex></span>;
+            {lines.map((line, lineIdx) => {
+                if (!line.trim()) {
+                    return <br key={lineIdx} />;
                 }
-                return <span key={i}>{part}</span>;
+
+                const lineHasLatex = latexPattern.test(line) || line.includes('$');
+
+                return (
+                    <React.Fragment key={lineIdx}>
+                        {lineHasLatex ? (
+                            <span style={{ display: 'inline' }}>
+                                <Latex>{wrapLatexFormulas(line)}</Latex>
+                            </span>
+                        ) : (
+                            <span>{line}</span>
+                        )}
+                        {lineIdx < lines.length - 1 && <br />}
+                    </React.Fragment>
+                );
             })}
         </span>
     );
 };
+
 
 
 interface QuestModeProps {
