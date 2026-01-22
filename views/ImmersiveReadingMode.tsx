@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { Book } from '../types';
+import { SimpleMarkdown } from '../components/SimpleMarkdown';
 
 interface ImmersiveReadingModeProps {
   book: Book; // 当前预设的书（如果任务指定了）
@@ -128,11 +129,7 @@ export const ImmersiveReadingMode: React.FC<ImmersiveReadingModeProps> = ({
               <h1 className="text-3xl font-bold text-center mb-8 text-stone-800 border-b pb-4 border-stone-100">
                 {readingContent.title}
               </h1>
-              <div className="prose prose-lg max-w-none text-stone-700 leading-loose">
-                {readingContent.content.split('\n').map((para, idx) => (
-                  <p key={idx} className="mb-6 indent-8 text-justify">{para}</p>
-                ))}
-              </div>
+              <SimpleMarkdown content={readingContent.content} className="text-stone-700 leading-loose" />
             </div>
 
             {/* Bottom Controls for Content View */}

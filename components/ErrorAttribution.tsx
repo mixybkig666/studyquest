@@ -81,9 +81,18 @@ export const ErrorAttribution: React.FC<ErrorAttributionProps> = ({
                 </button>
             </div>
 
-            {/* 题目预览 */}
+            {/* 题目预览 - 清理 LaTeX 显示纯文本 */}
             <div className="mb-3 py-2 px-3 bg-white/50 rounded-lg text-sm text-gray-600 line-clamp-2">
-                {questionText.length > 50 ? questionText.substring(0, 50) + '...' : questionText}
+                {(() => {
+                    // 清理 LaTeX 命令为可读文本
+                    let preview = questionText
+                        .replace(/\\\\?frac\{([^}]*)\}\{([^}]*)\}/g, '($1/$2)')  // \frac{a}{b} -> (a/b)
+                        .replace(/\\\\?(times|div|cdot)/g, (_, op) => op === 'times' ? '×' : op === 'div' ? '÷' : '·')
+                        .replace(/\\\\?(sqrt)\{([^}]*)\}/g, '√$2')
+                        .replace(/\$+/g, '')  // 移除 $ 符号
+                        .replace(/\s+/g, ' ').trim();
+                    return preview.length > 60 ? preview.substring(0, 60) + '...' : preview;
+                })()}
             </div>
 
             <div className="space-y-2">

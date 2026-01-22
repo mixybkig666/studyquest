@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 interface EmotionRecordProps {
     taskId: string;
@@ -26,22 +26,17 @@ export const EmotionRecord: React.FC<EmotionRecordProps> = ({
     onSubmit,
     onSkip,
 }) => {
-    const [selectedEmotion, setSelectedEmotion] = useState<EmotionData['emotion'] | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleSubmit = async () => {
-        if (!selectedEmotion) return;
-        setIsSubmitting(true);
-        await onSubmit({
+    // 点选即触发，不需要额外状态
+    const handleSelect = (emotion: EmotionData['emotion']) => {
+        onSubmit({
             taskId,
-            emotion: selectedEmotion,
+            emotion,
             scorePercentage,
         });
-        setIsSubmitting(false);
     };
 
     return (
-        <div className="mt-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-4 animate-fade-in">
+        <div className="mb-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-4 animate-fade-in">
             <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-blue-800 flex items-center gap-2">
                     <span>💭</span>
@@ -55,15 +50,12 @@ export const EmotionRecord: React.FC<EmotionRecordProps> = ({
                 </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="grid grid-cols-2 gap-2">
                 {EMOTION_OPTIONS.map(option => (
                     <button
                         key={option.id}
-                        onClick={() => setSelectedEmotion(option.id)}
-                        className={`py-3 px-3 rounded-xl border-2 text-left transition-all
-              ${selectedEmotion === option.id
-                                ? 'bg-blue-100 border-blue-400 text-blue-800 scale-[1.02]'
-                                : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300'}`}
+                        onClick={() => handleSelect(option.id)}
+                        className="py-3 px-3 rounded-xl border-2 text-left transition-all bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:scale-[1.02] active:scale-[0.98]"
                     >
                         <div className="flex items-center gap-2 mb-1">
                             <span className="text-xl">{option.emoji}</span>
@@ -74,18 +66,8 @@ export const EmotionRecord: React.FC<EmotionRecordProps> = ({
                 ))}
             </div>
 
-            {selectedEmotion && (
-                <button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50"
-                >
-                    {isSubmitting ? '记录中...' : '记录心情 ✓'}
-                </button>
-            )}
-
-            <p className="text-center text-xs text-blue-400 mt-2">
-                记录心情帮助 AI 更好地安排学习节奏 🎵
+            <p className="text-center text-xs text-blue-400 mt-3">
+                点选心情，帮助 AI 更好地安排学习节奏 🎵
             </p>
         </div>
     );

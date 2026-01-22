@@ -32,51 +32,68 @@ import Latex from 'react-latex-next';
 // 解决 react-latex-next 导致的长文本无法换行问题
 const SafeText: React.FC<{ children: string; className?: string }> = ({ children, className }) => {
     if (!children) return null;
-    const text = String(children);
+    let text = String(children);
 
-    // 检测是否包含 LaTeX 公式（使用字符串 includes 检测反斜杠命令）
-    // 支持更多常见的数学符号
+    // ====== Step 1: 预处理 - 规范化 LaTeX 格式 ======
+    // AI 可能生成 \\ (双反斜杠) 或 \ (单反斜杠)，需要统一处理
+
+    // 1.1 将双反斜杠转换为单反斜杠（常见于 JSON 转义）
+    text = text.replace(/\\\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|pi|theta)/g, '\\$1');
+
+    // 1.2 移除 LaTeX 命令前的多余空格和符号
+    text = text.replace(/\\\s+(frac|times|div|sqrt)/g, '\\$1');
+
+    // 1.3 清理畸形的 $$ 标记 (如 \$$\div$)
+    text = text.replace(/\\\$\$/g, ' ');
+    text = text.replace(/\$\\\$/g, ' ');
+
+    // ====== Step 2: 检测是否包含 LaTeX ======
     const latexPattern = /\\(frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|pi|theta)/;
     const hasLatex = text.includes('$') || latexPattern.test(text);
 
     if (!hasLatex) {
-        // 普通文本直接显示
         return <span className={className}>{text}</span>;
     }
 
-    // 包裹 LaTeX 公式的辅助函数
+    // ====== Step 3: 包裹 LaTeX 公式 ======
     const wrapLatexFormulas = (input: string): string => {
         let result = input;
 
-        // 1. 处理带双参数的命令 (如 \frac{a}{b})
+        // 移除已有的 $ 包裹，避免双重包裹
+        result = result.replace(/\$\$([^$]+)\$\$/g, '$1');
+        result = result.replace(/\$([^$]+)\$/g, '$1');
+
+        // 3.1 处理带双参数的命令 (如 \frac{a}{b})
         result = result.replace(
             /(\\frac\{[^}]*\}\{[^}]*\})/g,
             ' $$$1$$ '
         );
 
-        // 2. 处理带单参数的命令 (如 \sqrt{x})
+        // 3.2 处理带单参数的命令 (如 \sqrt{x})
         result = result.replace(
             /(\\sqrt\{[^}]*\})/g,
             ' $$$1$$ '
         );
 
-        // 3. 处理独立的操作符命令 (如 \times, \div, \cdot, \pm 等)
-        // 这些命令后面没有花括号参数
+        // 3.3 处理独立的操作符命令 (如 \times, \div)
         result = result.replace(
             /\\(times|div|cdot|pm|leq|geq|neq|infty|alpha|beta|pi|theta)(?![a-zA-Z{])/g,
-            ' $$$\\$1$$ '
+            ' $$\\$1$$ '
         );
+
+        // 3.4 清理多余空格
+        result = result.replace(/\s+/g, ' ').trim();
 
         return result;
     };
 
-    // 如果文本较短（<100字符），直接用 Latex 渲染整个文本
-    if (text.length < 100) {
+    // ====== Step 4: 渲染 ======
+    if (text.length < 200) {
         const wrappedText = wrapLatexFormulas(text);
         return <span className={className} style={{ display: 'inline' }}><Latex>{wrappedText}</Latex></span>;
     }
 
-    // 长文本：按句子分割，每段单独处理以实现换行
+    // 长文本：按句子分割
     const parts = text.split(/([。！？\n])/);
     return (
         <span className={className}>
@@ -105,43 +122,64 @@ const VICTORY_QUOTES = ENCOURAGEMENT.correct;
 
 const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard, taskId, userId, scorePercentage }) => {
     const [isClaiming, setIsClaiming] = React.useState(false);
-    const [feedbackSubmitted, setFeedbackSubmitted] = React.useState(false);
-    const [emotionSubmitted, setEmotionSubmitted] = React.useState(false);
 
+    // 使用步骤控制，而不是独立的提交状态
+    const [step, setStep] = React.useState<'emotion' | 'feedback' | 'done'>('emotion');
+
+    // 暂存数据，最后统一提交
+    const [pendingEmotion, setPendingEmotion] = React.useState<EmotionData | null>(null);
+    const [pendingFeedback, setPendingFeedback] = React.useState<FeedbackData | null>(null);
+
+    // 选择心情后自动跳转到反馈
+    const handleEmotionSelect = (emotion: EmotionData) => {
+        setPendingEmotion(emotion);
+        setStep('feedback');  // 自动跳转
+    };
+
+    // 收集反馈数据（不立即提交）
+    const handleFeedbackSelect = (feedback: FeedbackData) => {
+        setPendingFeedback(feedback);
+    };
+
+    // 收下奖励时统一提交所有数据
     const handleClaim = async () => {
         if (isClaiming) return;
         setIsClaiming(true);
+
         try {
+            // 1. 提交心情记录（如果有）
+            if (pendingEmotion && userId && taskId) {
+                await saveEmotionRecord({
+                    task_id: taskId,
+                    user_id: userId,
+                    emotion: pendingEmotion.emotion,
+                    score_percentage: pendingEmotion.scorePercentage,
+                });
+            }
+
+            // 2. 提交反馈记录（如果有）
+            if (pendingFeedback && pendingFeedback.overallRating && userId && taskId) {
+                await saveTaskFeedback({
+                    task_id: taskId,
+                    user_id: userId,
+                    overall_rating: pendingFeedback.overallRating,
+                    positive_tags: pendingFeedback.positiveTags,
+                    negative_tags: pendingFeedback.negativeTags,
+                });
+            }
+
+            // 3. 完成任务
             await onClaim();
         } finally {
-            // Don't reset - page will navigate away
+            // 页面会跳转，不需要重置状态
         }
     };
 
-    const handleFeedbackSubmit = async (feedback: FeedbackData) => {
-        if (userId && taskId) {
-            await saveTaskFeedback({
-                task_id: taskId,
-                user_id: userId,
-                overall_rating: feedback.overallRating!,
-                positive_tags: feedback.positiveTags,
-                negative_tags: feedback.negativeTags,
-            });
-        }
-        setFeedbackSubmitted(true);
-    };
+    // 跳过心情直接到反馈
+    const handleSkipEmotion = () => setStep('feedback');
 
-    const handleEmotionSubmit = async (emotion: EmotionData) => {
-        if (userId && taskId) {
-            await saveEmotionRecord({
-                task_id: taskId,
-                user_id: userId,
-                emotion: emotion.emotion,
-                score_percentage: emotion.scorePercentage,
-            });
-        }
-        setEmotionSubmitted(true);
-    };
+    // 跳过反馈直接完成
+    const handleSkipFeedback = () => setStep('done');
 
     return (
         <div className="min-h-screen bg-brand-bg flex items-center justify-center p-6 animate-fade-in text-center">
@@ -177,29 +215,48 @@ const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard, taskId,
                     </div>
                 </div>
 
-                {/* 情绪记录组件 - 优先显示 */}
-                {!emotionSubmitted && taskId && (
+                {/* Step 1: 情绪选择 */}
+                {step === 'emotion' && taskId && (
                     <EmotionRecord
                         taskId={taskId}
                         scorePercentage={scorePercentage || 0}
-                        onSubmit={handleEmotionSubmit}
-                        onSkip={() => setEmotionSubmitted(true)}
+                        onSubmit={handleEmotionSelect}
+                        onSkip={handleSkipEmotion}
                     />
                 )}
 
-                {/* 元认知反馈组件 - 情绪提交后显示 */}
-                {emotionSubmitted && !feedbackSubmitted && taskId && (
-                    <MetaCognitionFeedback
-                        taskId={taskId}
-                        onSubmit={handleFeedbackSubmit}
-                        onSkip={() => setFeedbackSubmitted(true)}
-                    />
+                {/* Step 2: 出题反馈 */}
+                {step === 'feedback' && taskId && (
+                    <>
+                        {pendingEmotion && (
+                            <div className="mb-3 text-sm text-gray-500 flex items-center justify-center gap-2">
+                                <span>心情已记录</span>
+                                <span className="text-lg">{
+                                    pendingEmotion.emotion === 'happy' ? '😊' :
+                                        pendingEmotion.emotion === 'calm' ? '😌' :
+                                            pendingEmotion.emotion === 'tired' ? '😫' : '😢'
+                                }</span>
+                            </div>
+                        )}
+                        <MetaCognitionFeedback
+                            taskId={taskId}
+                            onSubmit={(feedback) => {
+                                handleFeedbackSelect(feedback);
+                                setStep('done');
+                            }}
+                            onSkip={handleSkipFeedback}
+                        />
+                    </>
                 )}
 
-                {/* 反馈完成提示 */}
-                {emotionSubmitted && feedbackSubmitted && (
-                    <div className="mb-4 py-2 px-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
-                        感谢反馈！你的意见会帮助 AI 变得更聪明 🧠
+                {/* Step 3: 确认完成 */}
+                {step === 'done' && (
+                    <div className="mb-4 py-3 px-4 bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl text-green-700 text-sm animate-fade-in">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                            <span className="text-lg">✨</span>
+                            <span className="font-bold">感谢反馈！</span>
+                        </div>
+                        <p className="text-xs text-green-600">你的意见会帮助 AI 出更适合你的题目</p>
                     </div>
                 )}
 
@@ -215,7 +272,7 @@ const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard, taskId,
                             <LoadingIcon size="sm" />
                             保存中...
                         </span>
-                    ) : '收下奖励'}
+                    ) : step === 'done' ? '收下奖励 ✨' : '跳过并收下奖励'}
                 </Button>
             </div>
         </div>
@@ -592,7 +649,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                             {label}
                         </span>
                         <span className="flex-1">
-                            <Latex>{optionText.includes('\\') ? `$${optionText}$` : displayText}</Latex>
+                            <SafeText>{displayText}</SafeText>
                         </span>
                     </button>
                 );
