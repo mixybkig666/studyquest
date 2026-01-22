@@ -264,15 +264,15 @@ const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard, taskId,
                         <MetaCognitionFeedback
                             taskId={taskId}
                             onSubmit={(feedback) => {
+                                // 实时保存反馈数据（用户选择时触发）
                                 handleFeedbackSelect(feedback);
-                                setStep('done');
                             }}
                             onSkip={handleSkipFeedback}
                         />
                     </>
                 )}
 
-                {/* Step 3: 确认完成 */}
+                {/* Step 3: 确认完成 - 不再需要单独显示 */}
                 {step === 'done' && (
                     <div className="mb-4 py-3 px-4 bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl text-green-700 text-sm animate-fade-in">
                         <div className="flex items-center justify-center gap-2 mb-1">
@@ -295,7 +295,7 @@ const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard, taskId,
                             <LoadingIcon size="sm" />
                             保存中...
                         </span>
-                    ) : step === 'done' ? '收下奖励 ✨' : '跳过并收下奖励'}
+                    ) : (step === 'done' || pendingFeedback?.overallRating) ? '收下奖励 ✨' : '跳过并收下奖励'}
                 </Button>
             </div>
         </div>

@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Button } from './Button';
+import React, { useState, useEffect } from 'react';
 
 interface MetaCognitionFeedbackProps {
     taskId: string;
@@ -33,11 +32,9 @@ export const MetaCognitionFeedback: React.FC<MetaCognitionFeedbackProps> = ({
     onSubmit,
     onSkip,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
     const [overallRating, setOverallRating] = useState<'great' | 'ok' | 'bad' | null>(null);
     const [positiveTags, setPositiveTags] = useState<string[]>([]);
     const [negativeTags, setNegativeTags] = useState<string[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const toggleTag = (tag: string, isPositive: boolean) => {
         if (isPositive) {
@@ -51,49 +48,37 @@ export const MetaCognitionFeedback: React.FC<MetaCognitionFeedbackProps> = ({
         }
     };
 
-    const handleSubmit = async () => {
-        if (!overallRating) return;
-        setIsSubmitting(true);
-        await onSubmit({
-            taskId,
-            overallRating,
-            positiveTags,
-            negativeTags,
-        });
-        setIsSubmitting(false);
-    };
-
-    if (!isExpanded) {
-        return (
-            <button
-                onClick={() => setIsExpanded(true)}
-                className="w-full mt-4 py-3 px-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl text-purple-700 font-medium text-sm flex items-center justify-center gap-2 transition-colors"
-            >
-                <span>🧠</span>
-                <span>给 AI 出题打个分？</span>
-                <span className="text-purple-400 text-xs">(可选)</span>
-            </button>
-        );
-    }
+    // 当评分或标签变化时，实时通知父组件（用于最终提交）
+    useEffect(() => {
+        if (overallRating) {
+            onSubmit({
+                taskId,
+                overallRating,
+                positiveTags,
+                negativeTags,
+            });
+        }
+    }, [overallRating, positiveTags, negativeTags, taskId, onSubmit]);
 
     return (
-        <div className="mt-4 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-4 animate-fade-in">
+        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-4 animate-fade-in">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-purple-800 flex items-center gap-2">
                     <span>🧠</span>
                     <span>AI 出题反馈</span>
+                    <span className="text-purple-400 text-xs font-normal">(可选)</span>
                 </h3>
                 <button
-                    onClick={() => setIsExpanded(false)}
-                    className="text-purple-400 hover:text-purple-600 w-6 h-6 flex items-center justify-center"
+                    onClick={onSkip}
+                    className="text-purple-400 hover:text-purple-600 text-sm"
                 >
-                    ✕
+                    跳过
                 </button>
             </div>
 
             {/* 总体评价 */}
             <div className="mb-4">
-                <p className="text-sm text-purple-700 font-medium mb-2">1️⃣ 这组题目出得怎么样？</p>
+                <p className="text-sm text-purple-700 font-medium mb-2">这组题目出得怎么样？</p>
                 <div className="flex gap-2">
                     {[
                         { value: 'great' as const, emoji: '⭐', label: '很棒' },
@@ -103,22 +88,22 @@ export const MetaCognitionFeedback: React.FC<MetaCognitionFeedbackProps> = ({
                         <button
                             key={option.value}
                             onClick={() => setOverallRating(option.value)}
-                            className={`flex-1 py-2 px-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center justify-center gap-1.5
+                            className={`flex-1 py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center justify-center gap-1.5
                 ${overallRating === option.value
-                                    ? 'bg-purple-600 border-purple-600 text-white'
+                                    ? 'bg-purple-600 border-purple-600 text-white scale-105'
                                     : 'bg-white border-purple-200 text-purple-700 hover:border-purple-400'}`}
                         >
-                            <span>{option.emoji}</span>
+                            <span className="text-lg">{option.emoji}</span>
                             <span>{option.label}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* 好的地方 */}
+            {/* 好的地方 - 选了评分后展开 */}
             {overallRating && (
-                <div className="mb-4 animate-fade-in">
-                    <p className="text-sm text-purple-700 font-medium mb-2">2️⃣ 觉得好在哪里？<span className="text-purple-400 text-xs ml-1">(多选)</span></p>
+                <div className="mb-3 animate-fade-in">
+                    <p className="text-sm text-purple-700 font-medium mb-2">好在哪里？<span className="text-purple-400 text-xs ml-1">(可多选)</span></p>
                     <div className="grid grid-cols-2 gap-2">
                         {POSITIVE_OPTIONS.map(option => (
                             <button
@@ -133,17 +118,16 @@ export const MetaCognitionFeedback: React.FC<MetaCognitionFeedbackProps> = ({
                                     <span>{option.emoji}</span>
                                     <span className="font-medium">{option.label}</span>
                                 </div>
-                                <div className="text-xs text-gray-500 mt-0.5">{option.desc}</div>
                             </button>
                         ))}
                     </div>
                 </div>
             )}
 
-            {/* 不好的地方 */}
+            {/* 不好的地方 - 只在评分为"一般"或"不行"时显示 */}
             {overallRating && (overallRating === 'ok' || overallRating === 'bad') && (
-                <div className="mb-4 animate-fade-in">
-                    <p className="text-sm text-purple-700 font-medium mb-2">3️⃣ 觉得不好在哪里？<span className="text-purple-400 text-xs ml-1">(多选)</span></p>
+                <div className="mb-3 animate-fade-in">
+                    <p className="text-sm text-purple-700 font-medium mb-2">不好在哪里？<span className="text-purple-400 text-xs ml-1">(可多选)</span></p>
                     <div className="grid grid-cols-2 gap-2">
                         {NEGATIVE_OPTIONS.map(option => (
                             <button
@@ -158,34 +142,18 @@ export const MetaCognitionFeedback: React.FC<MetaCognitionFeedbackProps> = ({
                                     <span>{option.emoji}</span>
                                     <span className="font-medium">{option.label}</span>
                                 </div>
-                                <div className="text-xs text-gray-500 mt-0.5">{option.desc}</div>
                             </button>
                         ))}
                     </div>
                 </div>
             )}
 
-            {/* 提交按钮 */}
-            <div className="flex gap-2 mt-4">
-                <button
-                    onClick={onSkip}
-                    className="flex-1 py-2 text-purple-400 text-sm hover:text-purple-600"
-                >
-                    跳过
-                </button>
-                <Button
-                    onClick={handleSubmit}
-                    disabled={!overallRating || isSubmitting}
-                    className="flex-1"
-                    size="md"
-                >
-                    {isSubmitting ? '提交中...' : '提交反馈 ✓'}
-                </Button>
-            </div>
-
-            <p className="text-center text-xs text-purple-400 mt-3">
-                你的反馈会帮助 AI 出更好的题目哦 💪
-            </p>
+            {/* 选完评分后的提示 */}
+            {overallRating && (
+                <p className="text-center text-xs text-purple-400 mt-3 animate-fade-in">
+                    反馈已记录 ✓ 点击下方按钮领取奖励
+                </p>
+            )}
         </div>
     );
 };
