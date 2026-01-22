@@ -855,7 +855,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                                                 className={`p-3 rounded-lg border ${isCorrectOption ? 'bg-green-50 border-green-300 text-green-800' : 'bg-white border-gray-200 text-gray-600'}`}
                                                             >
                                                                 {isCorrectOption && <i className="fas fa-check-circle mr-2 text-green-500"></i>}
-                                                                <Latex>{opt.includes('\\') ? `$${opt}$` : opt}</Latex>
+                                                                <SafeText>{String(opt || '')}</SafeText>
                                                             </div>
                                                         );
                                                     })}
@@ -866,7 +866,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                             <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
                                                 <div className="text-green-700 font-bold text-sm mb-1">✅ 正确答案</div>
                                                 <div className="text-green-800">
-                                                    <Latex>{String(reviewQ.correct_answer || reviewQ.expected?.value || '')}</Latex>
+                                                    <SafeText>{String(reviewQ.correct_answer || reviewQ.expected?.value || '')}</SafeText>
                                                 </div>
                                             </div>
 
@@ -896,7 +896,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                                             {idx + 1}
                                                         </span>
                                                         <span className="text-gray-800 font-medium line-clamp-1 flex-1">
-                                                            {q.question_text?.substring(0, 40)}...
+                                                            <SafeText>{q.question_text?.substring(0, 50) || ''}</SafeText>
                                                         </span>
                                                     </div>
                                                     <i className="fas fa-chevron-right text-gray-400"></i>
