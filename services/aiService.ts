@@ -233,7 +233,8 @@ export const analyzeMaterialsAndCreatePlan = async (
     difficultyLevel?: 'low' | 'medium' | 'high';
     focusKnowledgePoints?: string[];
     reason?: string;
-  }
+  },
+  feedbackInsights?: string   // 基于学生反馈的出题建议
 ): Promise<any> => {
   try {
     console.log("🚀 Step 1: Generating Material & Analysis...");
@@ -684,6 +685,15 @@ export const analyzeMaterialsAndCreatePlan = async (
         - 40% 题目考察"需要复习"或"薄弱"的知识点
         - 30% 题目巩固"基本掌握"的知识点
         - 30% 题目为新知识点
+        ` : ''}
+
+        ${feedbackInsights ? `
+        ═══════════════════════════════════════════════════════════════
+        【🧠 STUDENT FEEDBACK INSIGHTS - METACOGNITION DATA】
+        ═══════════════════════════════════════════════════════════════
+        ${feedbackInsights}
+        
+        ⚠️ 这些是学生对之前 AI 出题的真实反馈，请务必参考调整！
         ` : ''}
 
         Reading Material Context:

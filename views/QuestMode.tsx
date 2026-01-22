@@ -7,6 +7,12 @@ import { checkUserAnswer } from '../services/answerNormalizer';
 import { updateMasteriesFromQuestions } from '../services/knowledgeService';
 import { Confetti, Sparkles } from '../components/Confetti';
 import { ENCOURAGEMENT } from '../constants/copywriting';
+import { MetaCognitionFeedback, FeedbackData } from '../components/MetaCognitionFeedback';
+import { EmotionRecord, EmotionData } from '../components/EmotionRecord';
+import { ErrorAttribution, ErrorAttributionData } from '../components/ErrorAttribution';
+import { saveTaskFeedback } from '../services/feedbackService';
+import { saveEmotionRecord } from '../services/emotionService';
+import { saveErrorAttribution } from '../services/errorAttributionService';
 import {
     TrophyIcon,
     TabletIcon,
@@ -97,8 +103,10 @@ interface QuestModeProps {
 // 使用统一的鼓励语库
 const VICTORY_QUOTES = ENCOURAGEMENT.correct;
 
-const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard }) => {
+const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard, taskId, userId, scorePercentage }) => {
     const [isClaiming, setIsClaiming] = React.useState(false);
+    const [feedbackSubmitted, setFeedbackSubmitted] = React.useState(false);
+    const [emotionSubmitted, setEmotionSubmitted] = React.useState(false);
 
     const handleClaim = async () => {
         if (isClaiming) return;
@@ -108,6 +116,31 @@ const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard }) => {
         } finally {
             // Don't reset - page will navigate away
         }
+    };
+
+    const handleFeedbackSubmit = async (feedback: FeedbackData) => {
+        if (userId && taskId) {
+            await saveTaskFeedback({
+                task_id: taskId,
+                user_id: userId,
+                overall_rating: feedback.overallRating!,
+                positive_tags: feedback.positiveTags,
+                negative_tags: feedback.negativeTags,
+            });
+        }
+        setFeedbackSubmitted(true);
+    };
+
+    const handleEmotionSubmit = async (emotion: EmotionData) => {
+        if (userId && taskId) {
+            await saveEmotionRecord({
+                task_id: taskId,
+                user_id: userId,
+                emotion: emotion.emotion,
+                score_percentage: emotion.scorePercentage,
+            });
+        }
+        setEmotionSubmitted(true);
     };
 
     return (
@@ -125,11 +158,11 @@ const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard }) => {
                 </div>
                 <h2 className="text-3xl font-black mb-6 text-brand-darkTeal">挑战成功！</h2>
 
-                <div className="bg-yellow-50 p-6 rounded-2xl mb-8 border border-yellow-100 transform rotate-1">
+                <div className="bg-yellow-50 p-6 rounded-2xl mb-6 border border-yellow-100 transform rotate-1">
                     <p className="text-gray-700 font-bold text-lg leading-relaxed">"{wisdomShard}"</p>
                 </div>
 
-                <div className="flex justify-around mb-8">
+                <div className="flex justify-around mb-6">
                     <div className="flex flex-col items-center">
                         <div className="icon-container-lg mb-1 icon-primary"><TabletIcon size="lg" /></div>
                         <span className="font-black text-blue-600 text-xl">+{rewards.tablet}m</span>
@@ -143,6 +176,32 @@ const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard }) => {
                         <span className="font-black text-brand-orange text-xl">+{rewards.xp} XP</span>
                     </div>
                 </div>
+
+                {/* 情绪记录组件 - 优先显示 */}
+                {!emotionSubmitted && taskId && (
+                    <EmotionRecord
+                        taskId={taskId}
+                        scorePercentage={scorePercentage || 0}
+                        onSubmit={handleEmotionSubmit}
+                        onSkip={() => setEmotionSubmitted(true)}
+                    />
+                )}
+
+                {/* 元认知反馈组件 - 情绪提交后显示 */}
+                {emotionSubmitted && !feedbackSubmitted && taskId && (
+                    <MetaCognitionFeedback
+                        taskId={taskId}
+                        onSubmit={handleFeedbackSubmit}
+                        onSkip={() => setFeedbackSubmitted(true)}
+                    />
+                )}
+
+                {/* 反馈完成提示 */}
+                {emotionSubmitted && feedbackSubmitted && (
+                    <div className="mb-4 py-2 px-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+                        感谢反馈！你的意见会帮助 AI 变得更聪明 🧠
+                    </div>
+                )}
 
                 <Button
                     onClick={handleClaim}
@@ -209,6 +268,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
     const [showKnowledgeDrawer, setShowKnowledgeDrawer] = useState(false);
     // 记录每道题是否查看了知识点（用于 XP 奖励计算）
     const [viewedKnowledgeForQuestion, setViewedKnowledgeForQuestion] = useState<Set<number>>(new Set());
+    const [attributionSubmittedForQuestion, setAttributionSubmittedForQuestion] = useState<Set<number>>(new Set());
 
     // 回顾模式：题目抽屉状态
     const [showQuestionsDrawer, setShowQuestionsDrawer] = useState(false);
@@ -639,7 +699,7 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
     }
 
     if (wisdomShard && rewardsEarned) {
-        return <CertificateView rewards={rewardsEarned} wisdomShard={wisdomShard} onClaim={() => onComplete({ ...rewardsEarned, correctCount }, questionsState)} />
+        return <CertificateView rewards={rewardsEarned} wisdomShard={wisdomShard} onClaim={() => onComplete({ ...rewardsEarned, correctCount }, questionsState)} taskId={task.id} userId={task.user_id} scorePercentage={rewardsEarned.scorePercentage} />
     }
 
     // ========== 回顾模式：阅读材料为主，题目列表为辅 ==========
@@ -915,6 +975,24 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                                         <span>💡 建议阅读知识点，帮助你理解这道题</span>
                                         <button onClick={handleViewKnowledge} className="text-purple-600 font-bold underline">查看知识点</button>
                                     </div>
+                                )}
+                                {/* 错题归因组件 - 答错后显示 */}
+                                {!isCorrect() && !attributionSubmittedForQuestion.has(currentStep) && (
+                                    <ErrorAttribution
+                                        questionId={currentQ.id}
+                                        questionText={currentQ.question_text}
+                                        onSubmit={async (attr) => {
+                                            if (task.user_id) {
+                                                await saveErrorAttribution({
+                                                    question_id: attr.questionId,
+                                                    user_id: task.user_id,
+                                                    error_type: attr.errorType,
+                                                });
+                                            }
+                                            setAttributionSubmittedForQuestion(prev => new Set([...prev, currentStep]));
+                                        }}
+                                        onSkip={() => setAttributionSubmittedForQuestion(prev => new Set([...prev, currentStep]))}
+                                    />
                                 )}
                                 <div className={`p-4 rounded-xl text-sm mb-4 border-l-4 shadow-sm ${isCorrect() ? 'bg-green-50 border-green-400 text-green-800' : 'bg-blue-50 border-blue-400 text-blue-800'}`}>
                                     <div className="flex justify-between items-start">

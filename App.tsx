@@ -15,6 +15,11 @@ import { learningService } from './services/learningService';
 import { userService } from './services/userService';
 import bookStack3d from './assets/icons/3d/book_stack_3d.png';
 
+// 开发模式：加载元认知测试工具
+if (import.meta.env.DEV) {
+    import('./tests/testMetacognitionEntry');
+}
+
 // Default reward config
 const DEFAULT_REWARD_CONFIG: RewardConfig = {
     base_tablet: 15, base_outdoor: 30, max_tablet: 120, max_outdoor: 240, allocation_ratio: 0.2, xp_to_minute_rate: 10

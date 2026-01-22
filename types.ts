@@ -159,6 +159,7 @@ export interface OpenEndedResult {
 
 export interface DailyTask {
   id: string;
+  user_id?: string;  // 任务所属用户
   task_type: 'quiz' | 'reading';
   task_date: string;
   material_id: string;

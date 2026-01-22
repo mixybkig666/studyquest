@@ -13,6 +13,7 @@ import { decideTeachingIntent, TeachingIntent, ChildContext } from './intentServ
 import { getChildContext } from './contextService';
 import { analyzeMaterialsAndCreatePlan } from './aiService';
 import { Attachment } from '../types';
+import { getFeedbackInsights, formatInsightsForPrompt } from './feedbackService';
 
 // ============================================
 // 类型定义
@@ -304,7 +305,16 @@ export async function generateTasksWithIntent(input: GenerateTasksInput): Promis
         };
     }
 
-    // Step 3: 调用 aiService 生成题目
+    // Step 3: 获取反馈洞察
+    console.log('[MasterAgent] Getting feedback insights...');
+    const feedbackInsights = await getFeedbackInsights(input.childId);
+    const feedbackPrompt = formatInsightsForPrompt(feedbackInsights);
+
+    if (feedbackInsights?.hasEnoughData) {
+        console.log('[MasterAgent] Feedback insights:', feedbackInsights.summary);
+    }
+
+    // Step 4: 调用 aiService 生成题目
     console.log('[MasterAgent] Calling aiService with intent:', teachingIntent.type);
 
     try {
@@ -320,7 +330,8 @@ export async function generateTasksWithIntent(input: GenerateTasksInput): Promis
                 difficultyLevel: teachingIntent.difficultyLevel,
                 focusKnowledgePoints: teachingIntent.focusKnowledgePoints,
                 reason: teachingIntent.reason
-            }
+            },
+            feedbackPrompt || undefined  // feedbackInsights
         );
 
         console.log('[MasterAgent] === Pipeline Complete ===');

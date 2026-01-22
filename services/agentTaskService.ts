@@ -13,6 +13,8 @@ import type { Attachment } from '../types';
 import { getChildContext } from './contextService';
 import { decideTeachingIntent, TeachingIntent } from './intentService';
 import { writeMemory } from './memoryService';
+import { getFeedbackInsights, formatInsightsForPrompt } from './feedbackService';
+import { getErrorTypeDistribution, formatErrorInsightsForPrompt } from './errorAttributionService';
 
 // ============================================
 // 类型定义
@@ -122,13 +124,47 @@ export async function generateTaskWithAgent(
             });
         }
 
-        // ====== Step 4: 使用意图生成任务 ======
-        console.log('[AgentTask] Step 4: Generating task with intent...');
+        // ====== Step 4: 获取反馈洞察 ======
+        console.log('[AgentTask] Step 4: Getting feedback insights...');
+        const feedbackInsights = await getFeedbackInsights(childId);
+        const feedbackPrompt = formatInsightsForPrompt(feedbackInsights);
+
+        // 获取错题归因分布
+        const errorDistribution = await getErrorTypeDistribution(childId);
+        const errorPrompt = formatErrorInsightsForPrompt(errorDistribution);
+
+        // 合并两个洞察
+        const combinedInsights = [feedbackPrompt, errorPrompt].filter(Boolean).join('\n');
+
+        if (feedbackInsights?.hasEnoughData) {
+            agentTrace.toolCalls.push({
+                name: 'get_feedback_insights',
+                params: { student_id: childId },
+                result: {
+                    difficultyAdvice: feedbackInsights.difficultyAdvice,
+                    summary: feedbackInsights.summary
+                }
+            });
+        }
+
+        if (errorDistribution && errorDistribution.total >= 5) {
+            agentTrace.toolCalls.push({
+                name: 'get_error_distribution',
+                params: { student_id: childId },
+                result: {
+                    total: errorDistribution.total,
+                    dominantType: errorDistribution.dominantType
+                }
+            });
+        }
+
+        // ====== Step 5: 使用意图生成任务 ======
+        console.log('[AgentTask] Step 5: Generating task with intent...');
 
         // 计算最近准确率（基于上下文）
         const recentAccuracy = 1 - context.masteryStats.recentErrorRate;
 
-        // 调用 aiService，传入教学意图
+        // 调用 aiService，传入教学意图和反馈洞察
         const aiResult = await analyzeMaterialsAndCreatePlan(
             instruction,
             attachments,
@@ -141,7 +177,8 @@ export async function generateTaskWithAgent(
                 difficultyLevel: teachingIntent.difficultyLevel,
                 focusKnowledgePoints: teachingIntent.focusKnowledgePoints,
                 reason: teachingIntent.reason
-            }
+            },
+            combinedInsights || undefined  // 合并的反馈+错题洞察
         );
 
         agentTrace.toolCalls.push({

@@ -10,6 +10,7 @@
 
 import { supabase } from './supabaseClient';
 import { ChildContext, ChildProfile, MasteryStats, BehaviorSignals, EmotionSignal } from './intentService';
+import { getEmotionTrend } from './emotionService';
 
 // ============================================
 // 主函数：获取完整上下文
@@ -20,15 +21,16 @@ import { ChildContext, ChildProfile, MasteryStats, BehaviorSignals, EmotionSigna
  */
 export async function getChildContext(childId: string): Promise<ChildContext> {
     // 并行获取各项数据
-    const [profile, masteryStats, behaviorSignals, memoryData] = await Promise.all([
+    const [profile, masteryStats, behaviorSignals, memoryData, emotionTrend] = await Promise.all([
         getChildProfile(childId),
         getMasteryStats(childId),
         getBehaviorSignals(childId),
-        getMemoryData(childId)
+        getMemoryData(childId),
+        getEmotionTrend(childId)  // 获取情绪趋势
     ]);
 
-    // 推断情绪信号
-    const emotionSignal = inferEmotionSignal(behaviorSignals, memoryData);
+    // 推断情绪信号（优先使用实际记录）
+    const emotionSignal = inferEmotionSignal(behaviorSignals, memoryData, emotionTrend);
 
     return {
         profile,
@@ -253,12 +255,28 @@ async function getMemoryData(childId: string): Promise<{
 // ============================================
 
 /**
- * 从行为和记忆数据推断情绪信号
+ * 从行为、记忆和情绪记录数据推断情绪信号
  */
 function inferEmotionSignal(
     behavior: BehaviorSignals,
-    memory: { ephemeral: any[]; hypotheses: any[]; stable: any[] }
+    memory: { ephemeral: any[]; hypotheses: any[]; stable: any[] },
+    emotionTrend?: Awaited<ReturnType<typeof getEmotionTrend>>
 ): EmotionSignal {
+    // 🆕 优先使用孩子的实际情绪记录
+    if (emotionTrend?.hasEnoughData && emotionTrend.recentEmotions.length > 0) {
+        const dominant = emotionTrend.dominantEmotion;
+
+        // 如果需要减负模式，返回疲劳信号
+        if (emotionTrend.needsLightenMode) {
+            return emotionTrend.frustrationStreak >= 3 ? 'low_mood' : 'fatigue';
+        }
+
+        // 映射情绪记录到意图信号
+        if (dominant === 'frustrated') return 'frustration';
+        if (dominant === 'tired') return 'fatigue';
+        if (dominant === 'happy') return 'engaged';
+    }
+
     // 检查假设层是否有情绪相关记录
     const emotionHypothesis = memory.hypotheses.find(h =>
         h.memory_key?.includes('fatigue') ||
