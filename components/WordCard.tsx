@@ -3,10 +3,9 @@
  * 用于拼写模式的核心交互组件
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { Word, LetterState } from '../types/word';
 import { usePronunciation } from '../hooks/usePronunciation';
-import { WordKeyboard } from './WordKeyboard';
 
 interface WordCardProps {
     word: Word;
@@ -29,8 +28,13 @@ export function WordCard({ word, mode, onComplete, showXpReward }: WordCardProps
     // 是否已提交
     const [submitted, setSubmitted] = useState(false);
 
-    // 目标单词（去掉空格和特殊字符用于比较）
+    // 目标单词（去掉空格用于比较）
     const targetWord = word.word.toLowerCase().trim();
+    // 去除空格的版本（用于比较）
+    const targetWordNoSpaces = targetWord.replace(/\s+/g, '');
+
+    // 输入框引用
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // 重置状态
     useEffect(() => {
@@ -39,6 +43,8 @@ export function WordCard({ word, mode, onComplete, showXpReward }: WordCardProps
         setShowHint(false);
         setResult('idle');
         setSubmitted(false);
+        // 自动聚焦输入框
+        setTimeout(() => inputRef.current?.focus(), 100);
     }, [word]);
 
     // 自动播放发音
@@ -62,11 +68,12 @@ export function WordCard({ word, mode, onComplete, showXpReward }: WordCardProps
         });
     }, [targetWord, input]);
 
-    // 检查答案
+    // 检查答案（忽略空格）
     const checkAnswer = useCallback(() => {
         if (submitted) return;
 
-        const isCorrect = input.toLowerCase().trim() === targetWord;
+        const userInputNoSpaces = input.toLowerCase().trim().replace(/\s+/g, '');
+        const isCorrect = userInputNoSpaces === targetWordNoSpaces;
         setResult(isCorrect ? 'correct' : 'wrong');
         setSubmitted(true);
 
@@ -79,7 +86,7 @@ export function WordCard({ word, mode, onComplete, showXpReward }: WordCardProps
         setTimeout(() => {
             onComplete(isCorrect, hintsUsed);
         }, isCorrect ? 1500 : 2500);
-    }, [input, targetWord, submitted, hintsUsed, onComplete, showXpReward]);
+    }, [input, targetWordNoSpaces, submitted, hintsUsed, onComplete, showXpReward]);
 
     // 使用提示
     const useHint = useCallback(() => {
@@ -138,20 +145,21 @@ export function WordCard({ word, mode, onComplete, showXpReward }: WordCardProps
                 .word-card {
                     background: linear-gradient(145deg, #ffffff, #f0f4f8);
                     border-radius: 24px;
-                    padding: 24px;
+                    padding: 32px;
                     box-shadow: 
                         8px 8px 16px rgba(0, 0, 0, 0.08),
                         -8px -8px 16px rgba(255, 255, 255, 0.9);
-                    max-width: 400px;
+                    max-width: 95%;
+                    width: 100%;
                     margin: 0 auto;
                 }
 
                 .word-card__translation {
-                    font-size: 1.5rem;
+                    font-size: 1.8rem;
                     font-weight: 700;
                     color: #333;
                     text-align: center;
-                    margin-bottom: 8px;
+                    margin-bottom: 12px;
                 }
 
                 .word-card__phonetic {
@@ -171,17 +179,17 @@ export function WordCard({ word, mode, onComplete, showXpReward }: WordCardProps
                 .word-card__speak-btn {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
-                    padding: 8px 16px;
-                    border-radius: 12px;
+                    gap: 4px;
+                    padding: 6px 12px;
+                    border-radius: 10px;
                     border: none;
                     background: linear-gradient(145deg, #4ECDC4, #45B7AA);
                     color: white;
-                    font-size: 0.9rem;
+                    font-size: 0.8rem;
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.2s;
-                    box-shadow: 0 4px 8px rgba(78, 205, 196, 0.3);
+                    box-shadow: 0 3px 6px rgba(78, 205, 196, 0.3);
                 }
 
                 .word-card__speak-btn:hover {
@@ -219,21 +227,23 @@ export function WordCard({ word, mode, onComplete, showXpReward }: WordCardProps
                 .word-card__letters {
                     display: flex;
                     justify-content: center;
-                    gap: 6px;
-                    margin-bottom: 20px;
+                    gap: 10px;
+                    margin-bottom: 24px;
                     flex-wrap: wrap;
+                    padding: 16px 0;
                 }
 
                 .word-card__letter {
-                    width: 36px;
-                    height: 44px;
+                    width: 52px;
+                    height: 64px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.4rem;
+                    font-size: 1.8rem;
                     font-weight: 700;
-                    border-radius: 8px;
+                    border-radius: 12px;
                     transition: all 0.2s;
+                    text-transform: uppercase;
                 }
 
                 .word-card__letter--pending {
@@ -469,9 +479,16 @@ export function WordCard({ word, mode, onComplete, showXpReward }: WordCardProps
                 </div>
             )}
 
-            {/* 触屏键盘 */}
+            {/* 输入提示（使用物理键盘） */}
             {!submitted && (
-                <WordKeyboard onKeyPress={handleKeyPress} />
+                <div style={{
+                    marginTop: '20px',
+                    textAlign: 'center',
+                    fontSize: '0.85rem',
+                    color: '#888'
+                }}>
+                    ⌨️ 直接用键盘输入，按 Enter 确认
+                </div>
             )}
         </div>
     );

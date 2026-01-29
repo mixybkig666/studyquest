@@ -50,21 +50,38 @@ export function WordPractice({ userId, onBack }: WordPracticeProps) {
         loadBooks();
     }, [userId]);
 
-    // 选择词库
-    const handleSelectBook = useCallback((bookId: string) => {
+    // 选择词库（跳过模式选择，直接开始拼写模式）
+    const handleSelectBook = useCallback(async (bookId: string) => {
         setSelectedBookId(bookId);
-        setViewState('select-mode');
-    }, []);
+        // 直接开始拼写模式练习
+        setSelectedMode('spell');
+        // 先切换到练习视图（显示加载状态）
+        setViewState('practice');
+        try {
+            const words = await wordService.getWordsForPractice(userId, bookId, 10);
+            if (words.length === 0) {
+                alert('该词库暂无可练习的单词');
+                setViewState('select-book');
+                return;
+            }
+            setPracticeWords(words);
+            setCurrentIndex(0);
+            setResults([]);
+            setComboCount(0);
+        } catch (err) {
+            console.error('Failed to load practice words:', err);
+            setViewState('select-book');
+        }
+    }, [userId]);
 
-    // 课本上传成功
+    // 课本上传成功（直接开始练习）
     const handleTextbookSuccess = useCallback(async (bookId: string, words: Word[]) => {
         // 刷新词库列表
         const books = await wordService.getWordBooks(userId);
         setWordBooks(books);
-        // 自动选择新创建的词库
-        setSelectedBookId(bookId);
-        setViewState('select-mode');
-    }, [userId]);
+        // 自动选择新创建的词库并开始练习
+        handleSelectBook(bookId);
+    }, [userId, handleSelectBook]);
 
     // 开始练习
     const handleStartPractice = useCallback(async (mode: PracticeMode) => {
@@ -175,8 +192,12 @@ export function WordPractice({ userId, onBack }: WordPracticeProps) {
 
                 .word-practice__content {
                     padding: 20px;
-                    max-width: 480px;
+                    max-width: 100%;
                     margin: 0 auto;
+                    min-height: calc(100vh - 80px);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
                 }
 
                 .word-practice__mode-select {

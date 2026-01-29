@@ -29,11 +29,20 @@ export function WordBookSelector({
         return groups;
     }, {} as Record<number, WordBookMeta[]>);
 
-    // 计算进度百分比
-    const getProgressPercent = (progress?: WordBookMeta['progress']): number => {
-        if (!progress) return 0;
-        const total = progress.new + progress.learning + progress.reviewing + progress.mastered;
+    // 计算进度百分比（基于已掌握）
+    const getProgressPercent = (progress?: WordBookMeta['progress'], total?: number): number => {
+        if (!progress || !total) return 0;
         return total > 0 ? Math.round((progress.mastered / total) * 100) : 0;
+    };
+
+    // 获取详细进度信息
+    const getProgressDetails = (progress?: WordBookMeta['progress']) => {
+        if (!progress) return { learning: 0, reviewing: 0, mastered: 0 };
+        return {
+            learning: progress.learning,
+            reviewing: progress.reviewing,
+            mastered: progress.mastered,
+        };
     };
 
     const getGradeName = (grade: number): string => {
@@ -187,7 +196,8 @@ export function WordBookSelector({
                             </div>
                             <div className="wordbook-selector__list">
                                 {books.map(book => {
-                                    const percent = getProgressPercent(book.progress);
+                                    const percent = getProgressPercent(book.progress, book.wordCount);
+                                    const details = getProgressDetails(book.progress);
                                     const isSelected = book.id === selectedBookId;
 
                                     return (
@@ -205,11 +215,9 @@ export function WordBookSelector({
                                                 </div>
                                                 <div className="wordbook-selector__meta">
                                                     <span>{book.wordCount} 词</span>
-                                                    {book.progress && (
-                                                        <span>
-                                                            已掌握 {book.progress.mastered} 词
-                                                        </span>
-                                                    )}
+                                                    <span style={{ color: '#4ECDC4' }}>学习中 {details.learning}</span>
+                                                    <span style={{ color: '#F59E0B' }}>复习中 {details.reviewing}</span>
+                                                    <span style={{ color: '#10B981' }}>已掌握 {details.mastered}</span>
                                                 </div>
                                             </div>
                                             <div className="wordbook-selector__progress">

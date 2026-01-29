@@ -229,7 +229,7 @@ export async function recordAnswer(
             .eq('user_id', userId)
             .eq('word', word)
             .eq('book_id', bookId)
-            .single();
+            .maybeSingle();
 
         if (existing) {
             // 更新现有记录
@@ -343,7 +343,7 @@ export async function getWrongWords(userId: string, bookId?: string): Promise<Wo
                     .select('*')
                     .eq('book_id', item.book_id)
                     .eq('word', item.word)
-                    .single();
+                    .maybeSingle();
 
                 if (entry) {
                     result.push({
