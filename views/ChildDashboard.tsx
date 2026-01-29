@@ -44,6 +44,7 @@ interface ChildDashboardProps {
   onRedeem?: (rewardId: string) => void;
   rewardsConfig: RewardConfig;
   currentRewards: { tablet: number; outdoor: number };
+  onStartWordPractice?: () => void;  // 新增：单词练习入口
 }
 
 export const ChildDashboard: React.FC<ChildDashboardProps> = ({
@@ -55,7 +56,8 @@ export const ChildDashboard: React.FC<ChildDashboardProps> = ({
   onSetWish,
   onRedeem,
   rewardsConfig,
-  currentRewards
+  currentRewards,
+  onStartWordPractice
 }) => {
   const [showShop, setShowShop] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -357,6 +359,30 @@ export const ChildDashboard: React.FC<ChildDashboardProps> = ({
 
         {/* 知识点掌握概览 */}
         <KnowledgeOverview userId={user.id} />
+
+        {/* 📚 快捷入口 - 单词练习 */}
+        {onStartWordPractice && (
+          <div className="mt-6">
+            <button
+              onClick={onStartWordPractice}
+              className="w-full group relative bg-gradient-to-r from-teal-400 to-cyan-500 rounded-[24px] p-5 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-colors"></div>
+              <div className="relative z-10 flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
+                  📚
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-white font-black text-xl mb-1">单词练习</div>
+                  <div className="text-white/80 text-sm font-bold">背单词像玩游戏一样有趣</div>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white text-xl group-hover:translate-x-1 transition-transform">
+                  →
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
 
         {/* Placeholder for future widgets */}
         <div className="mt-8"></div>

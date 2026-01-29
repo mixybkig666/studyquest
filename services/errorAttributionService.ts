@@ -10,6 +10,7 @@ export interface ErrorAttributionRecord {
     question_id: string;
     user_id: string;
     error_type: 'concept' | 'calculation' | 'reading' | 'careless' | 'unknown';
+    countermeasure?: string;  // 学生写的对策
     created_at?: string;
 }
 
@@ -24,6 +25,7 @@ export async function saveErrorAttribution(record: Omit<ErrorAttributionRecord, 
                 question_id: record.question_id,
                 user_id: record.user_id,
                 error_type: record.error_type,
+                countermeasure: record.countermeasure || null,
             })
             .select()
             .single();

@@ -1,0 +1,868 @@
+{
+    "id": "primary_4",
+    "name": "四年级核心词汇",
+    "description": "小学四年级英语核心单词，适合课后复习和预习",
+    "category": "builtin",
+    "gradeLevel": 4,
+    "wordCount": 50,
+    "words": [
+        {
+            "word": "bedroom",
+            "phonetic_us": "/ˈbedruːm/",
+            "phonetic_uk": "/ˈbedruːm/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "卧室"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "This is my bedroom.",
+                    "cn": "这是我的卧室。"
+                }
+            ]
+        },
+        {
+            "word": "kitchen",
+            "phonetic_us": "/ˈkɪtʃɪn/",
+            "phonetic_uk": "/ˈkɪtʃɪn/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "厨房"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Mom is cooking in the kitchen.",
+                    "cn": "妈妈在厨房做饭。"
+                }
+            ]
+        },
+        {
+            "word": "bathroom",
+            "phonetic_us": "/ˈbæθruːm/",
+            "phonetic_uk": "/ˈbɑːθruːm/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "浴室，卫生间"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I wash my face in the bathroom.",
+                    "cn": "我在浴室洗脸。"
+                }
+            ]
+        },
+        {
+            "word": "living room",
+            "phonetic_us": "/ˈlɪvɪŋ ruːm/",
+            "phonetic_uk": "/ˈlɪvɪŋ ruːm/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "客厅"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "We watch TV in the living room.",
+                    "cn": "我们在客厅看电视。"
+                }
+            ]
+        },
+        {
+            "word": "study",
+            "phonetic_us": "/ˈstʌdi/",
+            "phonetic_uk": "/ˈstʌdi/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "书房"
+                },
+                {
+                    "pos": "v.",
+                    "meaning": "学习"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Dad reads books in the study.",
+                    "cn": "爸爸在书房看书。"
+                }
+            ]
+        },
+        {
+            "word": "phone",
+            "phonetic_us": "/foʊn/",
+            "phonetic_uk": "/fəʊn/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "电话"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Where is my phone?",
+                    "cn": "我的电话在哪里？"
+                }
+            ]
+        },
+        {
+            "word": "table",
+            "phonetic_us": "/ˈteɪbl/",
+            "phonetic_uk": "/ˈteɪbl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "桌子"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The book is on the table.",
+                    "cn": "书在桌子上。"
+                }
+            ]
+        },
+        {
+            "word": "sofa",
+            "phonetic_us": "/ˈsoʊfə/",
+            "phonetic_uk": "/ˈsəʊfə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "沙发"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The cat is on the sofa.",
+                    "cn": "猫在沙发上。"
+                }
+            ]
+        },
+        {
+            "word": "fridge",
+            "phonetic_us": "/frɪdʒ/",
+            "phonetic_uk": "/frɪdʒ/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "冰箱"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The milk is in the fridge.",
+                    "cn": "牛奶在冰箱里。"
+                }
+            ]
+        },
+        {
+            "word": "bed",
+            "phonetic_us": "/bed/",
+            "phonetic_uk": "/bed/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "床"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I go to bed at nine.",
+                    "cn": "我九点上床睡觉。"
+                }
+            ]
+        },
+        {
+            "word": "schoolbag",
+            "phonetic_us": "/ˈskuːlbæɡ/",
+            "phonetic_uk": "/ˈskuːlbæɡ/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "书包"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "My schoolbag is very heavy.",
+                    "cn": "我的书包很重。"
+                }
+            ]
+        },
+        {
+            "word": "notebook",
+            "phonetic_us": "/ˈnoʊtbʊk/",
+            "phonetic_uk": "/ˈnəʊtbʊk/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "笔记本"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I have a new notebook.",
+                    "cn": "我有一个新笔记本。"
+                }
+            ]
+        },
+        {
+            "word": "maths book",
+            "phonetic_us": "/mæθs bʊk/",
+            "phonetic_uk": "/mæθs bʊk/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "数学书"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Open your maths book.",
+                    "cn": "打开你的数学书。"
+                }
+            ]
+        },
+        {
+            "word": "English book",
+            "phonetic_us": "/ˈɪŋɡlɪʃ bʊk/",
+            "phonetic_uk": "/ˈɪŋɡlɪʃ bʊk/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "英语书"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "This is my English book.",
+                    "cn": "这是我的英语书。"
+                }
+            ]
+        },
+        {
+            "word": "story-book",
+            "phonetic_us": "/ˈstɔːri bʊk/",
+            "phonetic_uk": "/ˈstɔːri bʊk/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "故事书"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I like reading story-books.",
+                    "cn": "我喜欢读故事书。"
+                }
+            ]
+        },
+        {
+            "word": "candy",
+            "phonetic_us": "/ˈkændi/",
+            "phonetic_uk": "/ˈkændi/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "糖果"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Can I have some candy?",
+                    "cn": "我可以吃些糖果吗？"
+                }
+            ]
+        },
+        {
+            "word": "toy",
+            "phonetic_us": "/tɔɪ/",
+            "phonetic_uk": "/tɔɪ/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "玩具"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I have many toys.",
+                    "cn": "我有很多玩具。"
+                }
+            ]
+        },
+        {
+            "word": "key",
+            "phonetic_us": "/kiː/",
+            "phonetic_uk": "/kiː/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "钥匙"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Where are my keys?",
+                    "cn": "我的钥匙在哪里？"
+                }
+            ]
+        },
+        {
+            "word": "strong",
+            "phonetic_us": "/strɔːŋ/",
+            "phonetic_uk": "/strɒŋ/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "强壮的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "He is very strong.",
+                    "cn": "他很强壮。"
+                }
+            ]
+        },
+        {
+            "word": "friendly",
+            "phonetic_us": "/ˈfrendli/",
+            "phonetic_uk": "/ˈfrendli/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "友好的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "She is very friendly.",
+                    "cn": "她很友好。"
+                }
+            ]
+        },
+        {
+            "word": "quiet",
+            "phonetic_us": "/ˈkwaɪət/",
+            "phonetic_uk": "/ˈkwaɪət/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "安静的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Please be quiet.",
+                    "cn": "请安静。"
+                }
+            ]
+        },
+        {
+            "word": "hair",
+            "phonetic_us": "/her/",
+            "phonetic_uk": "/heə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "头发"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "She has long hair.",
+                    "cn": "她有长头发。"
+                }
+            ]
+        },
+        {
+            "word": "shoe",
+            "phonetic_us": "/ʃuː/",
+            "phonetic_uk": "/ʃuː/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "鞋子"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I like your shoes.",
+                    "cn": "我喜欢你的鞋子。"
+                }
+            ]
+        },
+        {
+            "word": "glasses",
+            "phonetic_us": "/ˈɡlæsɪz/",
+            "phonetic_uk": "/ˈɡlɑːsɪz/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "眼镜"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "He wears glasses.",
+                    "cn": "他戴眼镜。"
+                }
+            ]
+        },
+        {
+            "word": "right",
+            "phonetic_us": "/raɪt/",
+            "phonetic_uk": "/raɪt/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "正确的"
+                },
+                {
+                    "pos": "n.",
+                    "meaning": "右边"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "You are right!",
+                    "cn": "你是对的！"
+                }
+            ]
+        },
+        {
+            "word": "music",
+            "phonetic_us": "/ˈmjuːzɪk/",
+            "phonetic_uk": "/ˈmjuːzɪk/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "音乐"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I like music.",
+                    "cn": "我喜欢音乐。"
+                }
+            ]
+        },
+        {
+            "word": "science",
+            "phonetic_us": "/ˈsaɪəns/",
+            "phonetic_uk": "/ˈsaɪəns/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "科学"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Science is fun.",
+                    "cn": "科学很有趣。"
+                }
+            ]
+        },
+        {
+            "word": "sports",
+            "phonetic_us": "/spɔːrts/",
+            "phonetic_uk": "/spɔːts/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "体育运动"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I like sports.",
+                    "cn": "我喜欢运动。"
+                }
+            ]
+        },
+        {
+            "word": "computer",
+            "phonetic_us": "/kəmˈpjuːtər/",
+            "phonetic_uk": "/kəmˈpjuːtə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "电脑"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I play games on the computer.",
+                    "cn": "我在电脑上玩游戏。"
+                }
+            ]
+        },
+        {
+            "word": "floor",
+            "phonetic_us": "/flɔːr/",
+            "phonetic_uk": "/flɔː/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "地板，楼层"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The classroom is on the first floor.",
+                    "cn": "教室在一楼。"
+                }
+            ]
+        },
+        {
+            "word": "dinner",
+            "phonetic_us": "/ˈdɪnər/",
+            "phonetic_uk": "/ˈdɪnə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "晚餐"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Dinner is ready.",
+                    "cn": "晚餐准备好了。"
+                }
+            ]
+        },
+        {
+            "word": "vegetable",
+            "phonetic_us": "/ˈvedʒtəbl/",
+            "phonetic_uk": "/ˈvedʒtəbl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "蔬菜"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Eat more vegetables.",
+                    "cn": "多吃蔬菜。"
+                }
+            ]
+        },
+        {
+            "word": "soup",
+            "phonetic_us": "/suːp/",
+            "phonetic_uk": "/suːp/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "汤"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I like soup.",
+                    "cn": "我喜欢喝汤。"
+                }
+            ]
+        },
+        {
+            "word": "fork",
+            "phonetic_us": "/fɔːrk/",
+            "phonetic_uk": "/fɔːk/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "叉子"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Use a fork to eat.",
+                    "cn": "用叉子吃饭。"
+                }
+            ]
+        },
+        {
+            "word": "knife",
+            "phonetic_us": "/naɪf/",
+            "phonetic_uk": "/naɪf/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "刀"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Be careful with the knife.",
+                    "cn": "小心刀。"
+                }
+            ]
+        },
+        {
+            "word": "chopsticks",
+            "phonetic_us": "/ˈtʃɑːpstɪks/",
+            "phonetic_uk": "/ˈtʃɒpstɪks/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "筷子"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I can use chopsticks.",
+                    "cn": "我会用筷子。"
+                }
+            ]
+        },
+        {
+            "word": "bowl",
+            "phonetic_us": "/boʊl/",
+            "phonetic_uk": "/bəʊl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "碗"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "A bowl of rice.",
+                    "cn": "一碗米饭。"
+                }
+            ]
+        },
+        {
+            "word": "parents",
+            "phonetic_us": "/ˈperənts/",
+            "phonetic_uk": "/ˈpeərənts/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "父母"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I love my parents.",
+                    "cn": "我爱我的父母。"
+                }
+            ]
+        },
+        {
+            "word": "uncle",
+            "phonetic_us": "/ˈʌŋkl/",
+            "phonetic_uk": "/ˈʌŋkl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "叔叔，舅舅"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "My uncle is a doctor.",
+                    "cn": "我叔叔是医生。"
+                }
+            ]
+        },
+        {
+            "word": "aunt",
+            "phonetic_us": "/ænt/",
+            "phonetic_uk": "/ɑːnt/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "阿姨，姑姑"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "My aunt is a teacher.",
+                    "cn": "我阿姨是老师。"
+                }
+            ]
+        },
+        {
+            "word": "baby",
+            "phonetic_us": "/ˈbeɪbi/",
+            "phonetic_uk": "/ˈbeɪbi/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "婴儿"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The baby is sleeping.",
+                    "cn": "宝宝在睡觉。"
+                }
+            ]
+        },
+        {
+            "word": "cousin",
+            "phonetic_us": "/ˈkʌzn/",
+            "phonetic_uk": "/ˈkʌzn/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "堂（表）兄弟姐妹"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I have three cousins.",
+                    "cn": "我有三个表兄弟。"
+                }
+            ]
+        },
+        {
+            "word": "doctor",
+            "phonetic_us": "/ˈdɑːktər/",
+            "phonetic_uk": "/ˈdɒktə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "医生"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "My mother is a doctor.",
+                    "cn": "我妈妈是医生。"
+                }
+            ]
+        },
+        {
+            "word": "driver",
+            "phonetic_us": "/ˈdraɪvər/",
+            "phonetic_uk": "/ˈdraɪvə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "司机"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "He is a bus driver.",
+                    "cn": "他是公交车司机。"
+                }
+            ]
+        },
+        {
+            "word": "farmer",
+            "phonetic_us": "/ˈfɑːrmər/",
+            "phonetic_uk": "/ˈfɑːmə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "农民"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The farmer grows rice.",
+                    "cn": "农民种水稻。"
+                }
+            ]
+        },
+        {
+            "word": "nurse",
+            "phonetic_us": "/nɜːrs/",
+            "phonetic_uk": "/nɜːs/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "护士"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The nurse is kind.",
+                    "cn": "护士很友善。"
+                }
+            ]
+        },
+        {
+            "word": "people",
+            "phonetic_us": "/ˈpiːpl/",
+            "phonetic_uk": "/ˈpiːpl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "人们"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Many people are here.",
+                    "cn": "很多人在这里。"
+                }
+            ]
+        },
+        {
+            "word": "puppy",
+            "phonetic_us": "/ˈpʌpi/",
+            "phonetic_uk": "/ˈpʌpi/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "小狗"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The puppy is cute.",
+                    "cn": "小狗很可爱。"
+                }
+            ]
+        },
+        {
+            "word": "football",
+            "phonetic_us": "/ˈfʊtbɔːl/",
+            "phonetic_uk": "/ˈfʊtbɔːl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "足球"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I play football every day.",
+                    "cn": "我每天踢足球。"
+                }
+            ]
+        },
+        {
+            "word": "basketball",
+            "phonetic_us": "/ˈbæskɪtbɔːl/",
+            "phonetic_uk": "/ˈbɑːskɪtbɔːl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "篮球"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Let's play basketball.",
+                    "cn": "我们打篮球吧。"
+                }
+            ]
+        }
+    ]
+}

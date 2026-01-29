@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS error_attribution (
   error_type TEXT NOT NULL CHECK (error_type IN 
     ('concept', 'calculation', 'reading', 'careless', 'unknown')),
   
+  -- 应对措施
+  countermeasure TEXT,
+  
   created_at TIMESTAMPTZ DEFAULT now()
 );
 

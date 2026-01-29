@@ -7,11 +7,12 @@ import { checkUserAnswer } from '../services/answerNormalizer';
 import { updateMasteriesFromQuestions } from '../services/knowledgeService';
 import { Confetti, Sparkles } from '../components/Confetti';
 import { ENCOURAGEMENT } from '../constants/copywriting';
-import { MetaCognitionFeedback, FeedbackData } from '../components/MetaCognitionFeedback';
-import { EmotionRecord, EmotionData } from '../components/EmotionRecord';
-import { ErrorAttribution, ErrorAttributionData } from '../components/ErrorAttribution';
-import { saveTaskFeedback } from '../services/feedbackService';
-import { saveEmotionRecord } from '../services/emotionService';
+import { ErrorAttribution } from '../components/ErrorAttribution';
+import { ConfidenceSelector, ConfidenceLevel } from '../components/ConfidenceSelector';
+import { ThinkingPredict, ThinkingApproach } from '../components/ThinkingPredict';
+import { KnowledgeReview, KnowledgeAssessment } from '../components/KnowledgeReview';
+import { XpReward, playCorrectSound } from '../components/XpReward';
+import { SmartFollowUp } from '../components/SmartFollowUp';
 import { saveErrorAttribution } from '../services/errorAttributionService';
 import {
     TrophyIcon,
@@ -28,109 +29,8 @@ import {
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 
-// 安全的文本渲染组件：处理 LaTeX 公式、换行符、双反斜杠等问题
-const SafeText: React.FC<{ children: string; className?: string }> = ({ children, className }) => {
-    if (!children) return null;
-    let text = String(children);
-
-    // ====== Step 1: 预处理 - 规范化特殊字符 ======
-
-    // 1.1 处理换行符：将字符串 "\n" 转换为真实换行
-    text = text.replace(/\\n/g, '\n');
-
-    // 1.2 将 JSON 转义的双反斜杠 LaTeX 命令转换为单反斜杠
-    // 数据库/JSON 中 \frac 会存储为 \\frac，在 JS 字符串中表现为 "\\frac"
-    // 注意：这里用正则匹配字面的两个反斜杠字符
-    const latexCommands = 'frac|times|div|sqrt|sum|int|cdot|leq|geq|neq|pm|infty|alpha|beta|gamma|delta|pi|theta|lambda|sigma';
-    text = text.replace(new RegExp(`\\\\\\\\(${latexCommands})`, 'g'), '\\$1');
-
-    // 1.3 清理畸形的 $$ 标记
-    text = text.replace(/\\\$\$/g, ' ');
-    text = text.replace(/\$\\\$/g, ' ');
-
-    // ====== Step 2: 检测是否包含 LaTeX ======
-    const latexPattern = new RegExp(`\\\\(${latexCommands})`);
-    const hasLatex = text.includes('$') || latexPattern.test(text);
-
-    if (!hasLatex) {
-        // 无 LaTeX，处理换行后直接返回
-        const lines = text.split('\n');
-        if (lines.length === 1) {
-            return <span className={className}>{text}</span>;
-        }
-        return (
-            <span className={className}>
-                {lines.map((line, i) => (
-                    <React.Fragment key={i}>
-                        {line}
-                        {i < lines.length - 1 && <br />}
-                    </React.Fragment>
-                ))}
-            </span>
-        );
-    }
-
-    // ====== Step 3: 包裹 LaTeX 公式 ======
-    const wrapLatexFormulas = (input: string): string => {
-        let result = input;
-
-        // 移除已有的 $ 或 $$ 包裹，避免双重包裹
-        result = result.replace(/\$\$([^$]+)\$\$/g, '$1');
-        result = result.replace(/\$([^$]+)\$/g, '$1');
-
-        // 3.1 处理 \frac{a}{b} - 支持嵌套大括号
-        result = result.replace(
-            /(\\frac\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g,
-            ' $$$1$$ '
-        );
-
-        // 3.2 处理 \sqrt{x}
-        result = result.replace(
-            /(\\sqrt\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g,
-            ' $$$1$$ '
-        );
-
-        // 3.3 处理独立操作符 \times, \div 等
-        result = result.replace(
-            new RegExp(`\\\\(${latexCommands})(?![a-zA-Z{])`, 'g'),
-            ' $$\\$1$$ '
-        );
-
-        // 3.4 清理多余空格（保留换行）
-        result = result.replace(/[ \t]+/g, ' ').trim();
-
-        return result;
-    };
-
-    // ====== Step 4: 渲染 ======
-    // 先按换行分割，然后每行单独处理 LaTeX
-    const lines = text.split('\n');
-
-    return (
-        <span className={className}>
-            {lines.map((line, lineIdx) => {
-                if (!line.trim()) {
-                    return <br key={lineIdx} />;
-                }
-
-                const lineHasLatex = latexPattern.test(line) || line.includes('$');
-
-                return (
-                    <React.Fragment key={lineIdx}>
-                        {lineHasLatex ? (
-                            <span style={{ display: 'inline' }}>
-                                <Latex>{wrapLatexFormulas(line)}</Latex>
-                            </span>
-                        ) : (
-                            <span>{line}</span>
-                        )}
-                        {lineIdx < lines.length - 1 && <br />}
-                    </React.Fragment>
-                );
-            })}
-        </span>
-    );
-};
+// 从 quest 模块导入抽取的组件
+import { SafeText, CertificateView } from './quest';
 
 
 
@@ -143,164 +43,8 @@ interface QuestModeProps {
 // 使用统一的鼓励语库
 const VICTORY_QUOTES = ENCOURAGEMENT.correct;
 
-const CertificateView: React.FC<any> = ({ rewards, onClaim, wisdomShard, taskId, userId, scorePercentage }) => {
-    const [isClaiming, setIsClaiming] = React.useState(false);
+// CertificateView 已移至 quest/CertificateView.tsx
 
-    // 使用步骤控制，而不是独立的提交状态
-    const [step, setStep] = React.useState<'emotion' | 'feedback' | 'done'>('emotion');
-
-    // 暂存数据，最后统一提交
-    const [pendingEmotion, setPendingEmotion] = React.useState<EmotionData | null>(null);
-    const [pendingFeedback, setPendingFeedback] = React.useState<FeedbackData | null>(null);
-
-    // 选择心情后自动跳转到反馈
-    const handleEmotionSelect = (emotion: EmotionData) => {
-        setPendingEmotion(emotion);
-        setStep('feedback');  // 自动跳转
-    };
-
-    // 收集反馈数据（不立即提交）
-    const handleFeedbackSelect = (feedback: FeedbackData) => {
-        setPendingFeedback(feedback);
-    };
-
-    // 收下奖励时统一提交所有数据
-    const handleClaim = async () => {
-        if (isClaiming) return;
-        setIsClaiming(true);
-
-        try {
-            // 1. 提交心情记录（如果有）
-            if (pendingEmotion && userId && taskId) {
-                await saveEmotionRecord({
-                    task_id: taskId,
-                    user_id: userId,
-                    emotion: pendingEmotion.emotion,
-                    score_percentage: pendingEmotion.scorePercentage,
-                });
-            }
-
-            // 2. 提交反馈记录（如果有）
-            if (pendingFeedback && pendingFeedback.overallRating && userId && taskId) {
-                await saveTaskFeedback({
-                    task_id: taskId,
-                    user_id: userId,
-                    overall_rating: pendingFeedback.overallRating,
-                    positive_tags: pendingFeedback.positiveTags,
-                    negative_tags: pendingFeedback.negativeTags,
-                });
-            }
-
-            // 3. 完成任务
-            await onClaim();
-        } finally {
-            // 页面会跳转，不需要重置状态
-        }
-    };
-
-    // 跳过心情直接到反馈
-    const handleSkipEmotion = () => setStep('feedback');
-
-    // 跳过反馈直接完成
-    const handleSkipFeedback = () => setStep('done');
-
-    return (
-        <div className="min-h-screen bg-brand-bg flex items-center justify-center p-6 animate-fade-in text-center">
-            {/* 彩纸庆祝动效 */}
-            <Confetti show={true} count={60} />
-
-            <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-md w-full relative overflow-hidden">
-                {/* 星星闪烁 */}
-                <Sparkles show={true} />
-
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-teal to-brand-orange"></div>
-                <div className="icon-container-xl mx-auto mb-4 animate-float icon-secondary">
-                    <TrophyIcon size="xl" />
-                </div>
-                <h2 className="text-3xl font-black mb-6 text-brand-darkTeal">挑战成功！</h2>
-
-                <div className="bg-yellow-50 p-6 rounded-2xl mb-6 border border-yellow-100 transform rotate-1">
-                    <p className="text-gray-700 font-bold text-lg leading-relaxed">"{wisdomShard}"</p>
-                </div>
-
-                <div className="flex justify-around mb-6">
-                    <div className="flex flex-col items-center">
-                        <div className="icon-container-lg mb-1 icon-primary"><TabletIcon size="lg" /></div>
-                        <span className="font-black text-blue-600 text-xl">+{rewards.tablet}m</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="icon-container-lg mb-1 icon-success"><OutdoorIcon size="lg" /></div>
-                        <span className="font-black text-green-600 text-xl">+{rewards.outdoor}m</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="icon-container-lg mb-1 icon-primary"><XpIcon size="lg" /></div>
-                        <span className="font-black text-brand-orange text-xl">+{rewards.xp} XP</span>
-                    </div>
-                </div>
-
-                {/* Step 1: 情绪选择 */}
-                {step === 'emotion' && taskId && (
-                    <EmotionRecord
-                        taskId={taskId}
-                        scorePercentage={scorePercentage || 0}
-                        onSubmit={handleEmotionSelect}
-                        onSkip={handleSkipEmotion}
-                    />
-                )}
-
-                {/* Step 2: 出题反馈 */}
-                {step === 'feedback' && taskId && (
-                    <>
-                        {pendingEmotion && (
-                            <div className="mb-3 text-sm text-gray-500 flex items-center justify-center gap-2">
-                                <span>心情已记录</span>
-                                <span className="text-lg">{
-                                    pendingEmotion.emotion === 'happy' ? '😊' :
-                                        pendingEmotion.emotion === 'calm' ? '😌' :
-                                            pendingEmotion.emotion === 'tired' ? '😫' : '😢'
-                                }</span>
-                            </div>
-                        )}
-                        <MetaCognitionFeedback
-                            taskId={taskId}
-                            onSubmit={(feedback) => {
-                                // 实时保存反馈数据（用户选择时触发）
-                                handleFeedbackSelect(feedback);
-                            }}
-                            onSkip={handleSkipFeedback}
-                        />
-                    </>
-                )}
-
-                {/* Step 3: 确认完成 - 不再需要单独显示 */}
-                {step === 'done' && (
-                    <div className="mb-4 py-3 px-4 bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl text-green-700 text-sm animate-fade-in">
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                            <span className="text-lg">✨</span>
-                            <span className="font-bold">感谢反馈！</span>
-                        </div>
-                        <p className="text-xs text-green-600">你的意见会帮助 AI 出更适合你的题目</p>
-                    </div>
-                )}
-
-                <Button
-                    onClick={handleClaim}
-                    variant="primary"
-                    size="xl"
-                    className="w-full shadow-xl hover:scale-105 transition-transform"
-                    disabled={isClaiming}
-                >
-                    {isClaiming ? (
-                        <span className="flex items-center justify-center gap-2">
-                            <LoadingIcon size="sm" />
-                            保存中...
-                        </span>
-                    ) : (step === 'done' || pendingFeedback?.overallRating) ? '收下奖励 ✨' : '跳过并收下奖励'}
-                </Button>
-            </div>
-        </div>
-    )
-}
 
 // 简化的文本格式化（移除 emoji 装饰，使用简洁设计）
 const formatTextWithEmojis = (text: string) => {
@@ -329,6 +73,11 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
     const [correctCount, setCorrectCount] = useState(0);
     const [accumulatedXP, setAccumulatedXP] = useState(0);
 
+    // 即时奖励动画状态
+    const [showXpReward, setShowXpReward] = useState(false);
+    const [lastXpEarned, setLastXpEarned] = useState(0);
+    const [comboCount, setComboCount] = useState(0);  // 连击计数
+
     const [isReadingCollapsed, setIsReadingCollapsed] = useState(false);
     const [questionsState, setQuestionsState] = useState(task.questions || []);
 
@@ -339,6 +88,18 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
     const [openEndedResult, setOpenEndedResult] = useState<OpenEndedResult | null>(null);
     const [isExplaining, setIsExplaining] = useState(false);
     const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+
+    // 自评状态：答题后先自评，再揭晓答案
+    const [awaitingConfidence, setAwaitingConfidence] = useState(false);
+    const [confidenceLevel, setConfidenceLevel] = useState<ConfidenceLevel | null>(null);
+
+    // 思路预判状态：答题前先预判思路
+    const [showThinkingPredict, setShowThinkingPredict] = useState(true);  // 默认显示
+    const [thinkingApproach, setThinkingApproach] = useState<ThinkingApproach | null>(null);
+
+    // 知识回顾状态：任务开始时显示
+    const [showKnowledgeReview, setShowKnowledgeReview] = useState(true);  // 第一题前显示
+    const [knowledgeAssessment, setKnowledgeAssessment] = useState<KnowledgeAssessment | null>(null);
 
     // 新版：阅读材料变为折叠式参考，不再强制阅读
     const isTaskCompleted = task.status === 'completed' || (window as any).__questReviewMode === true;
@@ -499,6 +260,13 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
     const handleAnswer = async () => {
         if (userAnswer === null || (typeof userAnswer === 'string' && userAnswer.trim() === '')) return;
 
+        // 对于客观题（选择/填空/判断），先让学生自评
+        const needsConfidence = ['choice', 'fill', 'true_false', 'correction'].includes(currentQ.question_type);
+        if (needsConfidence && !awaitingConfidence) {
+            setAwaitingConfidence(true);
+            return; // 等待用户选择自评后再继续
+        }
+
         let currentIsCorrect = false;
         let feedback = "";
         let openEndedEvaluation: OpenEndedResult | null = null;
@@ -549,9 +317,30 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
             const xpEarned = currentQ.question_type === 'open_ended' && openEndedEvaluation
                 ? Math.floor(baseScore * (openEndedEvaluation.score / 100))
                 : baseScore;
-            setAccumulatedXP(prev => prev + xpEarned);
+            // 自评准确奖励：自评"稳了"且确实对了，额外 +3 XP
+            const confidenceBonus = (confidenceLevel === 'confident' && currentIsCorrect) ? 3 : 0;
+            const totalXp = xpEarned + confidenceBonus;
+
+            setAccumulatedXP(prev => prev + totalXp);
+
+            // 触发即时奖励动画
+            setLastXpEarned(totalXp);
+            setComboCount(prev => prev + 1);
+            setShowXpReward(true);
+            playCorrectSound();
+        } else {
+            // 答错时重置连击
+            setComboCount(0);
         }
         setShowResult(true);
+        setAwaitingConfidence(false);
+    };
+
+    // 处理自评选择
+    const handleConfidenceSelect = (level: ConfidenceLevel) => {
+        setConfidenceLevel(level);
+        // 选择后继续执行答题流程
+        handleAnswer();
     };
 
     const handleNext = async () => {
@@ -592,6 +381,12 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
             setGradingResult(null);
             setOpenEndedResult(null);
             setAiExplanation(null);
+            // 重置自评状态
+            setConfidenceLevel(null);
+            setAwaitingConfidence(false);
+            // 重置思路预判状态
+            setShowThinkingPredict(true);
+            setThinkingApproach(null);
         }
     };
 
@@ -946,6 +741,16 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
 
     return (
         <div className="fixed inset-0 bg-gray-100 flex flex-col overflow-hidden">
+            {/* XP 奖励动画 */}
+            {showXpReward && (
+                <XpReward
+                    amount={lastXpEarned}
+                    showCombo={comboCount > 1}
+                    comboCount={comboCount}
+                    onComplete={() => setShowXpReward(false)}
+                />
+            )}
+
             {/* Progress Bar (Mobile) */}
             <div className="md:hidden h-1.5 bg-gray-200 w-full fixed top-0 z-30"><div className="h-full bg-brand-teal transition-all duration-500" style={{ width: `${progress}%` }}></div></div>
 
@@ -1014,101 +819,151 @@ export const QuestMode: React.FC<QuestModeProps> = ({ task, onExit, onComplete }
                 </header>
 
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto flex flex-col justify-center max-w-3xl mx-auto w-full">
-                    <Card className="animate-slide-up shadow-lg border-0 ring-1 ring-black/5">
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-2">
-                                <span className="px-2 py-1 bg-brand-mint text-brand-darkTeal text-xs font-bold rounded uppercase tracking-wider border border-brand-teal/20">{currentQ.question_type === 'fill' && currentQ.options ? 'CHOICE' : currentQ.question_type}</span>
-                                {currentQ.difficulty_tag && <span className={`px-2 py-1 text-xs font-bold rounded uppercase border ${currentQ.difficulty_tag === 'Hard' ? 'bg-red-50 text-red-500 border-red-100' : 'bg-gray-50 text-gray-500 border-gray-100'}`}>{currentQ.difficulty_tag}</span>}
-                            </div>
-                            <div className="flex items-center gap-3">
-                                {/* 📖 查看知识点按钮 */}
-                                {hasReadingMaterial && (
-                                    <button
-                                        onClick={handleViewKnowledge}
-                                        className="flex items-center gap-1 text-purple-600 text-sm font-bold hover:text-purple-800 transition-colors bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100"
-                                    >
-                                        <span>📖</span>
-                                        <span>知识点</span>
-                                    </button>
-                                )}
-                                <div className="flex items-center gap-1 text-brand-orange font-black">
-                                    <i className="fas fa-bolt"></i>
-                                    <span>{currentQ.score_value || 10} XP</span>
-                                </div>
-                            </div>
+                    {/* 知识回顾组件 - 仅在第一题且非回顾模式时显示 (独占显示) */}
+                    {currentStep === 0 && !isReviewMode && showKnowledgeReview ? (
+                        <div className="flex-1 flex flex-col justify-center">
+                            <KnowledgeReview
+                                subject={task.learning_material?.subject || 'other'}
+                                topic={questionsState[0]?.knowledge_points?.[0] || task.learning_material?.ai_analysis?.topic || '本次练习内容'}
+                                relatedTopics={questionsState[0]?.knowledge_points?.slice(1) || []}
+                                onComplete={(assessment) => {
+                                    setKnowledgeAssessment(assessment);
+                                    setShowKnowledgeReview(false);
+                                }}
+                                onSkip={() => setShowKnowledgeReview(false)}
+                            />
                         </div>
-
-                        <h3 className="text-xl md:text-2xl font-bold mb-8 text-gray-800 leading-relaxed font-display" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                            <SafeText>{currentQ.question_text || ''}</SafeText>
-                        </h3>
-
-                        {renderInteraction()}
-                    </Card>
-
-                    {/* Feedback Area */}
-                    <div className="mt-6 h-24">
-                        {showResult ? (
-                            <div className="animate-fade-in">
-                                {/* 答错时自动提示查看知识点 */}
-                                {!isCorrect() && hasReadingMaterial && !viewedKnowledgeForQuestion.has(currentStep) && (
-                                    <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-xl text-purple-700 text-sm flex items-center justify-between">
-                                        <span>💡 建议阅读知识点，帮助你理解这道题</span>
-                                        <button onClick={handleViewKnowledge} className="text-purple-600 font-bold underline">查看知识点</button>
+                    ) : (
+                        <div className="flex-1 flex flex-col w-full">
+                            <Card className="animate-slide-up shadow-lg border-0 ring-1 ring-black/5">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-2">
+                                        <span className="px-2 py-1 bg-brand-mint text-brand-darkTeal text-xs font-bold rounded uppercase tracking-wider border border-brand-teal/20">{currentQ.question_type === 'fill' && currentQ.options ? 'CHOICE' : currentQ.question_type}</span>
+                                        {currentQ.difficulty_tag && <span className={`px-2 py-1 text-xs font-bold rounded uppercase border ${currentQ.difficulty_tag === 'Hard' ? 'bg-red-50 text-red-500 border-red-100' : 'bg-gray-50 text-gray-500 border-gray-100'}`}>{currentQ.difficulty_tag}</span>}
                                     </div>
-                                )}
-                                {/* 错题归因组件 - 答错后显示 */}
-                                {!isCorrect() && !attributionSubmittedForQuestion.has(currentStep) && (
-                                    <ErrorAttribution
-                                        questionId={currentQ.id}
-                                        questionText={currentQ.question_text}
-                                        onSubmit={async (attr) => {
-                                            if (task.user_id) {
-                                                await saveErrorAttribution({
-                                                    question_id: attr.questionId,
-                                                    user_id: task.user_id,
-                                                    error_type: attr.errorType,
-                                                });
-                                            }
-                                            setAttributionSubmittedForQuestion(prev => new Set([...prev, currentStep]));
-                                        }}
-                                        onSkip={() => setAttributionSubmittedForQuestion(prev => new Set([...prev, currentStep]))}
-                                    />
-                                )}
-                                <div className={`p-4 rounded-xl text-sm mb-4 border-l-4 shadow-sm ${isCorrect() ? 'bg-green-50 border-green-400 text-green-800' : 'bg-blue-50 border-blue-400 text-blue-800'}`}>
-                                    <div className="flex justify-between items-start">
-                                        <div className="font-bold text-base mb-1">
-                                            {isCorrect()
-                                                ? `🎉 回答正确！ +${calculateXP(currentQ.score_value || 10, true)} XP${!viewedKnowledgeForQuestion.has(currentStep) ? ' (独立完成奖励!)' : ''}`
-                                                : '💪 继续加油！'
-                                            }
+                                    <div className="flex items-center gap-3">
+                                        {/* 📖 查看知识点按钮 */}
+                                        {hasReadingMaterial && (
+                                            <button
+                                                onClick={handleViewKnowledge}
+                                                className="flex items-center gap-1 text-purple-600 text-sm font-bold hover:text-purple-800 transition-colors bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100"
+                                            >
+                                                <span>📖</span>
+                                                <span>知识点</span>
+                                            </button>
+                                        )}
+                                        <div className="flex items-center gap-1 text-brand-orange font-black">
+                                            <i className="fas fa-bolt"></i>
+                                            <span>{currentQ.score_value || 10} XP</span>
                                         </div>
                                     </div>
-                                    <div className="mt-2 text-gray-700" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                                        <SafeText>{currentQ.explanation || ''}</SafeText>
-                                    </div>
-                                    {!aiExplanation && <div onClick={handleExplainMore} className="mt-2 text-brand-teal font-bold cursor-pointer hover:underline">🤔 还是不懂？点我让 AI 老师详解</div>}
-                                    {aiExplanation && <div className="mt-3 bg-white/80 p-3 rounded border border-blue-100" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                                        <SafeText>{aiExplanation || ''}</SafeText>
-                                    </div>}
                                 </div>
-                                <Button onClick={handleNext} className="w-full shadow-xl" size="xl" icon={<i className="fas fa-arrow-right"></i>}>{isLastQuestion ? "领取奖励" : "下一题"}</Button>
+
+                                <h3 className="text-xl md:text-2xl font-bold mb-8 text-gray-800 leading-relaxed font-display" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                                    <SafeText>{currentQ.question_text || ''}</SafeText>
+                                </h3>
+
+                                {/* 思路预判组件 - 紧凑工具栏模式 */}
+                                {!isReviewMode && !showResult && showThinkingPredict &&
+                                    currentStep % 3 === 0 &&
+                                    ['choice', 'fill', 'true_false'].includes(currentQ.question_type) && (
+                                        <ThinkingPredict
+                                            questionType={currentQ.question_type}
+                                            questionText={currentQ.question_text}
+                                            subject={task.learning_material?.subject || 'math'}
+                                            onSelect={(approach) => {
+                                                setThinkingApproach(approach);
+                                                setShowThinkingPredict(false);
+                                            }}
+                                            onSkip={() => setShowThinkingPredict(false)}
+                                        />
+                                    )}
+
+                                {renderInteraction()}
+                            </Card>
+
+
+                            {/* Feedback Area */}
+                            <div className="mt-6 h-24">
+                                {showResult ? (
+                                    <div className="animate-fade-in">
+                                        {/* 答错时自动提示查看知识点 */}
+                                        {!isCorrect() && hasReadingMaterial && !viewedKnowledgeForQuestion.has(currentStep) && (
+                                            <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-xl text-purple-700 text-sm flex items-center justify-between">
+                                                <span>💡 建议阅读知识点，帮助你理解这道题</span>
+                                                <button onClick={handleViewKnowledge} className="text-purple-600 font-bold underline">查看知识点</button>
+                                            </div>
+                                        )}
+                                        {/* 智能追问组件 - 答错后显示，帮助定位困难点 */}
+                                        {!isCorrect() && !attributionSubmittedForQuestion.has(currentStep) && (
+                                            <SmartFollowUp
+                                                questionText={currentQ.question_text}
+                                                subject={task.learning_material?.subject || 'math'}
+                                                onSelect={(response) => {
+                                                    console.log('[SmartFollowUp] Selected:', response);
+                                                }}
+                                                onSkip={() => { }}
+                                            />
+                                        )}
+                                        {/* 错题归因组件 - 答错后显示 */}
+                                        {!isCorrect() && !attributionSubmittedForQuestion.has(currentStep) && (
+                                            <ErrorAttribution
+                                                questionId={currentQ.id}
+                                                questionText={currentQ.question_text}
+                                                subject={task.learning_material?.subject || 'math'}
+                                                onSubmit={async (attr) => {
+                                                    if (task.user_id) {
+                                                        await saveErrorAttribution({
+                                                            question_id: attr.questionId,
+                                                            user_id: task.user_id,
+                                                            error_type: attr.errorType,
+                                                        });
+                                                    }
+                                                    setAttributionSubmittedForQuestion(prev => new Set([...prev, currentStep]));
+                                                }}
+                                                onSkip={() => setAttributionSubmittedForQuestion(prev => new Set([...prev, currentStep]))}
+                                            />
+                                        )}
+                                        <div className={`p-4 rounded-xl text-sm mb-4 border-l-4 shadow-sm ${isCorrect() ? 'bg-green-50 border-green-400 text-green-800' : 'bg-blue-50 border-blue-400 text-blue-800'}`}>
+                                            <div className="flex justify-between items-start">
+                                                <div className="font-bold text-base mb-1">
+                                                    {isCorrect()
+                                                        ? `🎉 回答正确！ +${calculateXP(currentQ.score_value || 10, true)} XP${!viewedKnowledgeForQuestion.has(currentStep) ? ' (独立完成奖励!)' : ''}`
+                                                        : '💪 继续加油！'
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div className="mt-2 text-gray-700" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                                                <SafeText>{currentQ.explanation || ''}</SafeText>
+                                            </div>
+                                            {!aiExplanation && <div onClick={handleExplainMore} className="mt-2 text-brand-teal font-bold cursor-pointer hover:underline">🤔 还是不懂？点我让 AI 老师详解</div>}
+                                            {aiExplanation && <div className="mt-3 bg-white/80 p-3 rounded border border-blue-100" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                                                <SafeText>{aiExplanation || ''}</SafeText>
+                                            </div>}
+                                        </div>
+                                        <Button onClick={handleNext} className="w-full shadow-xl" size="xl" icon={<i className="fas fa-arrow-right"></i>}>{isLastQuestion ? "领取奖励" : "下一题"}</Button>
+                                    </div>
+                                ) : awaitingConfidence ? (
+                                    // 等待自评：显示自评选择器
+                                    <ConfidenceSelector onSelect={handleConfidenceSelect} />
+                                ) : (
+                                    isReviewMode ? (
+                                        <div className="space-y-3">
+                                            <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-green-700 text-sm text-center">
+                                                <i className="fas fa-eye mr-2"></i>
+                                                回顾模式：你正在查看已完成的任务，不能重新作答
+                                            </div>
+                                            <Button onClick={onExit} className="w-full" size="xl" variant="secondary" icon={<i className="fas fa-arrow-left"></i>}>返回看板</Button>
+                                        </div>
+                                    ) : (
+                                        <Button onClick={handleAnswer} className="w-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all" size="xl" disabled={!userAnswer && userAnswer !== 0}>提交答案</Button>
+                                    )
+                                )}
                             </div>
-                        ) : (
-                            isReviewMode ? (
-                                <div className="space-y-3">
-                                    <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-green-700 text-sm text-center">
-                                        <i className="fas fa-eye mr-2"></i>
-                                        回顾模式：你正在查看已完成的任务，不能重新作答
-                                    </div>
-                                    <Button onClick={onExit} className="w-full" size="xl" variant="secondary" icon={<i className="fas fa-arrow-left"></i>}>返回看板</Button>
-                                </div>
-                            ) : (
-                                <Button onClick={handleAnswer} className="w-full shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all" size="xl" disabled={!userAnswer && userAnswer !== 0}>提交答案</Button>
-                            )
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </main>
             </div>
-        </div>
+        </div >
     );
 };

@@ -1,0 +1,520 @@
+{
+    "id": "primary_3",
+    "name": "三年级核心词汇",
+    "description": "小学三年级英语入门单词，简单易学",
+    "category": "builtin",
+    "gradeLevel": 3,
+    "wordCount": 30,
+    "words": [
+        {
+            "word": "red",
+            "phonetic_us": "/red/",
+            "phonetic_uk": "/red/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "红色的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The apple is red.",
+                    "cn": "苹果是红色的。"
+                }
+            ]
+        },
+        {
+            "word": "yellow",
+            "phonetic_us": "/ˈjeloʊ/",
+            "phonetic_uk": "/ˈjeləʊ/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "黄色的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The banana is yellow.",
+                    "cn": "香蕉是黄色的。"
+                }
+            ]
+        },
+        {
+            "word": "blue",
+            "phonetic_us": "/bluː/",
+            "phonetic_uk": "/bluː/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "蓝色的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The sky is blue.",
+                    "cn": "天空是蓝色的。"
+                }
+            ]
+        },
+        {
+            "word": "green",
+            "phonetic_us": "/ɡriːn/",
+            "phonetic_uk": "/ɡriːn/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "绿色的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The grass is green.",
+                    "cn": "草是绿色的。"
+                }
+            ]
+        },
+        {
+            "word": "white",
+            "phonetic_us": "/waɪt/",
+            "phonetic_uk": "/waɪt/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "白色的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The cloud is white.",
+                    "cn": "云是白色的。"
+                }
+            ]
+        },
+        {
+            "word": "black",
+            "phonetic_us": "/blæk/",
+            "phonetic_uk": "/blæk/",
+            "translations": [
+                {
+                    "pos": "adj.",
+                    "meaning": "黑色的"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The cat is black.",
+                    "cn": "猫是黑色的。"
+                }
+            ]
+        },
+        {
+            "word": "dog",
+            "phonetic_us": "/dɔːɡ/",
+            "phonetic_uk": "/dɒɡ/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "狗"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I have a dog.",
+                    "cn": "我有一只狗。"
+                }
+            ]
+        },
+        {
+            "word": "cat",
+            "phonetic_us": "/kæt/",
+            "phonetic_uk": "/kæt/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "猫"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The cat is cute.",
+                    "cn": "猫很可爱。"
+                }
+            ]
+        },
+        {
+            "word": "bird",
+            "phonetic_us": "/bɜːrd/",
+            "phonetic_uk": "/bɜːd/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "鸟"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "The bird can fly.",
+                    "cn": "鸟会飞。"
+                }
+            ]
+        },
+        {
+            "word": "fish",
+            "phonetic_us": "/fɪʃ/",
+            "phonetic_uk": "/fɪʃ/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "鱼"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I like fish.",
+                    "cn": "我喜欢鱼。"
+                }
+            ]
+        },
+        {
+            "word": "apple",
+            "phonetic_us": "/ˈæpl/",
+            "phonetic_uk": "/ˈæpl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "苹果"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I eat an apple.",
+                    "cn": "我吃一个苹果。"
+                }
+            ]
+        },
+        {
+            "word": "book",
+            "phonetic_us": "/bʊk/",
+            "phonetic_uk": "/bʊk/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "书"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "This is my book.",
+                    "cn": "这是我的书。"
+                }
+            ]
+        },
+        {
+            "word": "pen",
+            "phonetic_us": "/pen/",
+            "phonetic_uk": "/pen/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "钢笔"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I have a pen.",
+                    "cn": "我有一支钢笔。"
+                }
+            ]
+        },
+        {
+            "word": "pencil",
+            "phonetic_us": "/ˈpensl/",
+            "phonetic_uk": "/ˈpensl/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "铅笔"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "This is a pencil.",
+                    "cn": "这是一支铅笔。"
+                }
+            ]
+        },
+        {
+            "word": "ruler",
+            "phonetic_us": "/ˈruːlər/",
+            "phonetic_uk": "/ˈruːlə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "尺子"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Use the ruler.",
+                    "cn": "用尺子。"
+                }
+            ]
+        },
+        {
+            "word": "eraser",
+            "phonetic_us": "/ɪˈreɪsər/",
+            "phonetic_uk": "/ɪˈreɪzə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "橡皮"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I need an eraser.",
+                    "cn": "我需要一块橡皮。"
+                }
+            ]
+        },
+        {
+            "word": "bag",
+            "phonetic_us": "/bæɡ/",
+            "phonetic_uk": "/bæɡ/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "包"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "This is my bag.",
+                    "cn": "这是我的包。"
+                }
+            ]
+        },
+        {
+            "word": "hand",
+            "phonetic_us": "/hænd/",
+            "phonetic_uk": "/hænd/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "手"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Show me your hand.",
+                    "cn": "给我看看你的手。"
+                }
+            ]
+        },
+        {
+            "word": "head",
+            "phonetic_us": "/hed/",
+            "phonetic_uk": "/hed/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "头"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Touch your head.",
+                    "cn": "摸摸你的头。"
+                }
+            ]
+        },
+        {
+            "word": "face",
+            "phonetic_us": "/feɪs/",
+            "phonetic_uk": "/feɪs/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "脸"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Wash your face.",
+                    "cn": "洗洗你的脸。"
+                }
+            ]
+        },
+        {
+            "word": "eye",
+            "phonetic_us": "/aɪ/",
+            "phonetic_uk": "/aɪ/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "眼睛"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Close your eyes.",
+                    "cn": "闭上你的眼睛。"
+                }
+            ]
+        },
+        {
+            "word": "ear",
+            "phonetic_us": "/ɪr/",
+            "phonetic_uk": "/ɪə/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "耳朵"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I can hear with my ears.",
+                    "cn": "我用耳朵听。"
+                }
+            ]
+        },
+        {
+            "word": "nose",
+            "phonetic_us": "/noʊz/",
+            "phonetic_uk": "/nəʊz/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "鼻子"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Touch your nose.",
+                    "cn": "摸摸你的鼻子。"
+                }
+            ]
+        },
+        {
+            "word": "mouth",
+            "phonetic_us": "/maʊθ/",
+            "phonetic_uk": "/maʊθ/",
+            "translations": [
+                {
+                    "pos": "n.",
+                    "meaning": "嘴巴"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Open your mouth.",
+                    "cn": "张开你的嘴巴。"
+                }
+            ]
+        },
+        {
+            "word": "one",
+            "phonetic_us": "/wʌn/",
+            "phonetic_uk": "/wʌn/",
+            "translations": [
+                {
+                    "pos": "num.",
+                    "meaning": "一"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I have one apple.",
+                    "cn": "我有一个苹果。"
+                }
+            ]
+        },
+        {
+            "word": "two",
+            "phonetic_us": "/tuː/",
+            "phonetic_uk": "/tuː/",
+            "translations": [
+                {
+                    "pos": "num.",
+                    "meaning": "二"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I have two hands.",
+                    "cn": "我有两只手。"
+                }
+            ]
+        },
+        {
+            "word": "three",
+            "phonetic_us": "/θriː/",
+            "phonetic_uk": "/θriː/",
+            "translations": [
+                {
+                    "pos": "num.",
+                    "meaning": "三"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Three birds.",
+                    "cn": "三只鸟。"
+                }
+            ]
+        },
+        {
+            "word": "four",
+            "phonetic_us": "/fɔːr/",
+            "phonetic_uk": "/fɔː/",
+            "translations": [
+                {
+                    "pos": "num.",
+                    "meaning": "四"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Four books.",
+                    "cn": "四本书。"
+                }
+            ]
+        },
+        {
+            "word": "five",
+            "phonetic_us": "/faɪv/",
+            "phonetic_uk": "/faɪv/",
+            "translations": [
+                {
+                    "pos": "num.",
+                    "meaning": "五"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "I have five fingers.",
+                    "cn": "我有五根手指。"
+                }
+            ]
+        },
+        {
+            "word": "hello",
+            "phonetic_us": "/həˈloʊ/",
+            "phonetic_uk": "/həˈləʊ/",
+            "translations": [
+                {
+                    "pos": "int.",
+                    "meaning": "你好"
+                }
+            ],
+            "sentences": [
+                {
+                    "en": "Hello, everyone!",
+                    "cn": "大家好！"
+                }
+            ]
+        }
+    ]
+}

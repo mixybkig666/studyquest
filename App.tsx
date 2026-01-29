@@ -6,6 +6,7 @@ import { RoleSelect } from './views/RoleSelect';
 import { ParentDashboard } from './views/ParentDashboard';
 import { QuestMode } from './views/QuestMode';
 import { ImmersiveReadingMode } from './views/ImmersiveReadingMode';
+import { WordPractice } from './views/WordPractice';
 import { LoginPage } from './views/LoginPage';
 import { PinEntryModal } from './components/PinEntryModal';
 import { useAuth } from './contexts/AuthContext';
@@ -28,7 +29,7 @@ const DEFAULT_REWARD_CONFIG: RewardConfig = {
 const App: React.FC = () => {
     const { user, loading: authLoading, session, children: familyChildren, selectedChild, viewAsRole, selectChild, switchToParentView, switchToChildView, refreshUser, refreshFamily, signOut, addChild } = useAuth();
 
-    const [currentView, setCurrentView] = useState<'role-select' | 'child-dashboard' | 'parent-dashboard' | 'quest-mode' | 'immersive-reading'>('role-select');
+    const [currentView, setCurrentView] = useState<'role-select' | 'child-dashboard' | 'parent-dashboard' | 'quest-mode' | 'immersive-reading' | 'word-practice'>('role-select');
     const [tasks, setTasks] = useState<DailyTask[]>([]);
     const [repository, setRepository] = useState<RepositoryItem[]>([]);
     const [activeTask, setActiveTask] = useState<DailyTask | null>(null);
@@ -436,6 +437,7 @@ const App: React.FC = () => {
                     currentRewards={calculateCurrentRewards(tasks)}
                     onSetWish={handleSetWish}
                     onRedeem={handleRedeemReward}
+                    onStartWordPractice={() => setCurrentView('word-practice')}
                 />
             )}
 
@@ -481,6 +483,13 @@ const App: React.FC = () => {
                         await taskService.updateReadingTask(activeTask.id, s, r);
                         handleQuestComplete({ xp: 50, correctCount: 0, tablet: 0, outdoor: 0 }, []);
                     }}
+                />
+            )}
+
+            {currentView === 'word-practice' && effectiveChild && (
+                <WordPractice
+                    userId={effectiveChild.id}
+                    onBack={() => setCurrentView('child-dashboard')}
                 />
             )}
 

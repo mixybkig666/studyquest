@@ -2,16 +2,65 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { Attachment } from "../types";
 
+
 // Use Cloudflare Worker proxy to bypass CORS and regional restrictions
 // Worker requires X-API-Key header for authentication
-const AI_BASE_URL = import.meta.env.VITE_AI_BASE_URL || 'https://api.restoremotion.xyz';
-const WORKER_API_KEY = import.meta.env.VITE_WORKER_API_KEY || '';
+
+export interface AIConfig {
+  provider: 'google-direct' | 'worker-proxy';
+  apiKey: string;
+  baseUrl?: string; // Optional, undefined means default Google API
+  headers?: Record<string, string>;
+}
+
+export const getAIConfig = (): AIConfig => {
+  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const workerUrl = import.meta.env.VITE_WORKER_URL;
+  const workerKey = import.meta.env.VITE_WORKER_API_KEY;
+  // Legacy support
+  const legacyBaseUrl = import.meta.env.VITE_AI_BASE_URL;
+
+  // 1. Direct Google Connection (Highest Priority)
+  // Check if key looks like a real Google key (starts with AIza...) or is explicitly set
+  if (geminiKey && geminiKey.length > 10 && geminiKey !== 'cf-worker-proxy') {
+    console.log('🤖 AI Service: Using Direct Google API');
+    return {
+      provider: 'google-direct',
+      apiKey: geminiKey,
+      // baseUrl is undefined for default google endpoint
+    };
+  }
+
+  // 2. Worker Proxy (Preferred if URL is set)
+  if (workerUrl || legacyBaseUrl) {
+    console.log('🤖 AI Service: Using Worker Proxy');
+    return {
+      provider: 'worker-proxy',
+      apiKey: 'cf-worker-proxy', // SDK requires a non-empty string
+      baseUrl: workerUrl || legacyBaseUrl,
+      headers: workerKey ? { 'X-API-Key': workerKey } : undefined
+    };
+  }
+
+  // 3. Fallback (Default legacy)
+  console.error('❌ AI Service: No configuration found!');
+  console.error('👉 Please set VITE_GEMINI_API_KEY (for direct) or VITE_WORKER_URL (for proxy) in .env');
+
+  return {
+    provider: 'worker-proxy',
+    apiKey: 'missing-configuration',
+    baseUrl: '', // Invalid URL to fail requests
+    headers: undefined
+  };
+}
+
+const config = getAIConfig();
 
 const ai = new GoogleGenAI({
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY || 'cf-worker-proxy',
+  apiKey: config.apiKey,
   httpOptions: {
-    baseUrl: AI_BASE_URL,
-    headers: WORKER_API_KEY ? { 'X-API-Key': WORKER_API_KEY } : undefined
+    baseUrl: config.baseUrl,
+    headers: config.headers
   }
 });
 

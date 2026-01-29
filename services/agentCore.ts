@@ -11,19 +11,19 @@
 
 import { GoogleGenAI } from "@google/genai";
 import agentTools, { AGENT_TOOLS, executeTool, ToolName } from './agentTools';
+import { getAIConfig } from './aiService';
 
 // ============================================
 // 配置
 // ============================================
 
-const AI_BASE_URL = import.meta.env.VITE_AI_BASE_URL || 'https://api.restoremotion.xyz';
-const WORKER_API_KEY = import.meta.env.VITE_WORKER_API_KEY || '';
+const config = getAIConfig();
 
 const ai = new GoogleGenAI({
-    apiKey: import.meta.env.VITE_GEMINI_API_KEY || 'cf-worker-proxy',
+    apiKey: config.apiKey,
     httpOptions: {
-        baseUrl: AI_BASE_URL,
-        headers: WORKER_API_KEY ? { 'X-API-Key': WORKER_API_KEY } : undefined
+        baseUrl: config.baseUrl,
+        headers: config.headers
     }
 });
 
